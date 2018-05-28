@@ -11,7 +11,7 @@ import (
 const (
 	MERGE_PATTERN  = `^Merge `
 	HEADER_PATTERN = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
-	LINE_LIMIT     = 100
+	LINE_LIMIT     = 80
 	BODY_REQUIRED  = false
 )
 
