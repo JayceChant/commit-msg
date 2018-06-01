@@ -9,14 +9,13 @@ import (
 )
 
 func logAndExit(state MsgState, v ...interface{}) {
-	a := append([]interface{}{state.Name()}, v...)
 	if state <= Merge {
-		log.Printf(state.Hint(), a...)
+		log.Printf(state.Hint(), v...)
 		os.Exit(0)
 	} else if state <= FileMissing {
-		log.Fatalf(state.Hint(), a...)
+		log.Fatalf(state.Hint(), v...)
 	} else {
-		log.Printf(state.Hint(), a...)
+		log.Printf(state.Hint(), v...)
 		log.Fatalf(ruleHint, strings.Join(typeList[:], ", "))
 	}
 }
