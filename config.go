@@ -1,11 +1,21 @@
 package main
 
+import (
+	"encoding/json"
+	"os"
+)
+
 const (
 	MERGE_PATTERN  = `^Merge `
 	HEADER_PATTERN = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
-	LINE_LIMIT     = 80
-	BODY_REQUIRED  = false
+	CONFIG_FILE    = "commit-msg.cfg.json"
 )
+
+type Config struct {
+	Lang         string
+	BodyRequired bool
+	LineLimit    int
+}
 
 type MsgState int
 
@@ -29,7 +39,7 @@ const (
 )
 
 var (
-	lang      = "zh-CN"
+	config    *Config
 	stateHint []string
 	ruleHint  string
 	typeList  = [...]string{
@@ -102,9 +112,40 @@ if you can not find any error after check, maybe you use Chinese colon, or lack 
 	}
 )
 
+func loadConfig() *Config {
+	f, err := os.Open(CONFIG_FILE)
+	if err != nil {
+		return nil
+	}
+	defer f.Close()
+	dec := json.NewDecoder(f)
+	var cfg Config
+	if err := dec.Decode(&cfg); err != nil {
+		return nil
+	}
+	return &cfg
+}
+
+func initConfig() *Config {
+	cfg := &Config{"en", false, 80}
+	f, err := os.Create(CONFIG_FILE)
+	if err != nil {
+		return cfg
+	}
+	defer f.Close()
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "    ")
+	enc.Encode(cfg)
+	return cfg
+}
+
 func init() {
-	// lang = "zh-CN"
-	switch lang {
+	config = loadConfig()
+	if config == nil {
+		config = initConfig()
+	}
+
+	switch config.Lang {
 	case "zh-CN":
 		stateHint = zhCnHint[:]
 		ruleHint = zhCnRule

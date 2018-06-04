@@ -78,15 +78,15 @@ func checkHeader(header string) {
 	// subject := groups[5] // TODO: 根据规则对subject检查
 
 	length := len(header)
-	if length > LINE_LIMIT &&
+	if length > config.LineLimit &&
 		!(isFixupOrSquash || type_ == "revert" || type_ == "Revert") {
-		logAndExit(LineOverLong, length, LINE_LIMIT, header)
+		logAndExit(LineOverLong, length, config.LineLimit, header)
 	}
 }
 
 func checkBody(body string) {
 	if checkEmpty(body) {
-		if BODY_REQUIRED {
+		if config.BodyRequired {
 			logAndExit(BodyMissing)
 		} else {
 			logAndExit(Validated)
@@ -99,8 +99,8 @@ func checkBody(body string) {
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
-		if length > LINE_LIMIT {
-			logAndExit(LineOverLong, length, LINE_LIMIT, line)
+		if length > config.LineLimit {
+			logAndExit(LineOverLong, length, config.LineLimit, line)
 		}
 	}
 }
@@ -125,7 +125,7 @@ func validateMsg(msg string) {
 
 	if len(sections) == 2 {
 		checkBody(sections[1])
-	} else if BODY_REQUIRED {
+	} else if config.BodyRequired {
 		logAndExit(BodyMissing)
 	}
 
