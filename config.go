@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	MERGE_PATTERN  = `^Merge `
-	HEADER_PATTERN = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
-	CONFIG_FILE    = "commit-msg.cfg.json"
+	MERGE_PATTERN    = `^Merge `
+	HEADER_PATTERN   = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
+	CONFIG_FILE_NAME = "commit-msg.cfg.json"
+	HOOK_DIR         = "./.git/hooks/"
 )
 
 type GlobalConfig struct {
@@ -66,8 +67,16 @@ func (state MsgState) Hint() string {
 	return Lang.HintList[state]
 }
 
-func loadConfig() *GlobalConfig {
-	f, err := os.Open(CONFIG_FILE)
+func locateConfig() string {
+	f, err := os.Stat(HOOK_DIR)
+	if err != nil || !f.IsDir() {
+		return CONFIG_FILE_NAME
+	}
+	return HOOK_DIR + CONFIG_FILE_NAME
+}
+
+func loadConfig(path string) *GlobalConfig {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil
 	}
@@ -80,9 +89,9 @@ func loadConfig() *GlobalConfig {
 	return &cfg
 }
 
-func initConfig() *GlobalConfig {
+func initConfig(path string) *GlobalConfig {
 	cfg := &GlobalConfig{"en", false, 80}
-	f, err := os.Create(CONFIG_FILE)
+	f, err := os.Create(path)
 	if err != nil {
 		return cfg
 	}
@@ -94,9 +103,10 @@ func initConfig() *GlobalConfig {
 }
 
 func init() {
-	Config = loadConfig()
+	path := locateConfig()
+	Config = loadConfig(path)
 	if Config == nil {
-		Config = initConfig()
+		Config = initConfig(path)
 	}
 
 	switch Config.Lang {
