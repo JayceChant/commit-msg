@@ -11,7 +11,7 @@ const (
 	CONFIG_FILE    = "commit-msg.cfg.json"
 )
 
-type Config struct {
+type GlobalConfig struct {
 	Lang         string
 	BodyRequired bool
 	LineLimit    int
@@ -39,10 +39,10 @@ const (
 )
 
 var (
-	config    *Config
+	Config    *GlobalConfig
+	RuleHint  string
 	stateHint []string
-	ruleHint  string
-	typeList  = [...]string{
+	TypeList  = [...]string{
 		"feat",     // new feature 新功能
 		"fix",      // fix bug 修复
 		"docs",     // documentation 文档
@@ -112,22 +112,22 @@ if you can not find any error after check, maybe you use Chinese colon, or lack 
 	}
 )
 
-func loadConfig() *Config {
+func loadConfig() *GlobalConfig {
 	f, err := os.Open(CONFIG_FILE)
 	if err != nil {
 		return nil
 	}
 	defer f.Close()
 	dec := json.NewDecoder(f)
-	var cfg Config
+	var cfg GlobalConfig
 	if err := dec.Decode(&cfg); err != nil {
 		return nil
 	}
 	return &cfg
 }
 
-func initConfig() *Config {
-	cfg := &Config{"en", false, 80}
+func initConfig() *GlobalConfig {
+	cfg := &GlobalConfig{"en", false, 80}
 	f, err := os.Create(CONFIG_FILE)
 	if err != nil {
 		return cfg
@@ -140,18 +140,18 @@ func initConfig() *Config {
 }
 
 func init() {
-	config = loadConfig()
-	if config == nil {
-		config = initConfig()
+	Config = loadConfig()
+	if Config == nil {
+		Config = initConfig()
 	}
 
-	switch config.Lang {
+	switch Config.Lang {
 	case "zh-CN":
 		stateHint = zhCnHint[:]
-		ruleHint = zhCnRule
+		RuleHint = zhCnRule
 	default:
 		stateHint = enHint[:]
-		ruleHint = enRule
+		RuleHint = enRule
 	}
 }
 

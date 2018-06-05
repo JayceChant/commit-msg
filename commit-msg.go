@@ -16,7 +16,7 @@ func logAndExit(state MsgState, v ...interface{}) {
 		log.Fatalf(state.Hint(), v...)
 	} else {
 		log.Printf(state.Hint(), v...)
-		log.Fatalf(ruleHint, strings.Join(typeList[:], ", "))
+		log.Fatalf(RuleHint, strings.Join(TypeList[:], ", "))
 	}
 }
 
@@ -50,12 +50,12 @@ func checkEmpty(str string) bool {
 }
 
 func checkType(type_ string) {
-	for _, t := range typeList {
+	for _, t := range TypeList {
 		if type_ == t {
 			return
 		}
 	}
-	logAndExit(WrongType, type_, strings.Join(typeList[:], ", "))
+	logAndExit(WrongType, type_, strings.Join(TypeList[:], ", "))
 }
 
 func checkHeader(header string) {
@@ -78,15 +78,15 @@ func checkHeader(header string) {
 	// subject := groups[5] // TODO: 根据规则对subject检查
 
 	length := len(header)
-	if length > config.LineLimit &&
+	if length > Config.LineLimit &&
 		!(isFixupOrSquash || type_ == "revert" || type_ == "Revert") {
-		logAndExit(LineOverLong, length, config.LineLimit, header)
+		logAndExit(LineOverLong, length, Config.LineLimit, header)
 	}
 }
 
 func checkBody(body string) {
 	if checkEmpty(body) {
-		if config.BodyRequired {
+		if Config.BodyRequired {
 			logAndExit(BodyMissing)
 		} else {
 			logAndExit(Validated)
@@ -99,8 +99,8 @@ func checkBody(body string) {
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
-		if length > config.LineLimit {
-			logAndExit(LineOverLong, length, config.LineLimit, line)
+		if length > Config.LineLimit {
+			logAndExit(LineOverLong, length, Config.LineLimit, line)
 		}
 	}
 }
@@ -125,7 +125,7 @@ func validateMsg(msg string) {
 
 	if len(sections) == 2 {
 		checkBody(sections[1])
-	} else if config.BodyRequired {
+	} else if Config.BodyRequired {
 		logAndExit(BodyMissing)
 	}
 
