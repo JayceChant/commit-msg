@@ -16,7 +16,7 @@ func logAndExit(state MsgState, v ...interface{}) {
 		log.Fatalf(state.Hint(), v...)
 	} else {
 		log.Printf(state.Hint(), v...)
-		log.Fatalf(RuleHint, strings.Join(TypeList[:], ", "))
+		log.Fatalf(Lang.Rule, Types)
 	}
 }
 
@@ -55,7 +55,7 @@ func checkType(type_ string) {
 			return
 		}
 	}
-	logAndExit(WrongType, type_, strings.Join(TypeList[:], ", "))
+	logAndExit(WrongType, type_, Types)
 }
 
 func checkHeader(header string) {
