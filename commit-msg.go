@@ -110,13 +110,7 @@ func validateMsg(msg string) {
 		logAndExit(EmptyMessage)
 	}
 
-	isMerge, err := regexp.MatchString(MERGE_PATTERN, msg)
-	if err != nil {
-		log.Println(err)
-		logAndExit(UndefindedError)
-	}
-
-	if isMerge {
+	if strings.HasPrefix(msg, MERGE_PREFIX) {
 		logAndExit(Merge)
 	}
 

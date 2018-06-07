@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	MERGE_PATTERN    = `^Merge `
+	MERGE_PREFIX    = `Merge `
 	HEADER_PATTERN   = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
 	CONFIG_FILE_NAME = "commit-msg.cfg.json"
 	HOOK_DIR         = "./.git/hooks/"
