@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	MERGE_PREFIX    = `Merge `
+	MERGE_PREFIX     = `Merge `
 	HEADER_PATTERN   = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
 	CONFIG_FILE_NAME = "commit-msg.cfg.json"
 	HOOK_DIR         = "./.git/hooks/"
@@ -81,8 +81,9 @@ func loadConfig(path string) *GlobalConfig {
 		return nil
 	}
 	defer f.Close()
+
 	dec := json.NewDecoder(f)
-	var cfg GlobalConfig
+	cfg := GlobalConfig{"en", false, 80}
 	if err := dec.Decode(&cfg); err != nil {
 		return nil
 	}
