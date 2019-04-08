@@ -10,3 +10,15 @@ func TestGetMsg(t *testing.T) {
 		t.Error("Failed!")
 	}
 }
+
+func TestValidateSample(t *testing.T) {
+	defer func() {
+		err := recover()
+		state, ok := err.(msgState)
+		if !ok || state > Merge {
+			t.Errorf("Failed! %v", err)
+		}
+	}()
+
+	validateMsg(getMsg("testcase/sample.txt"))
+}

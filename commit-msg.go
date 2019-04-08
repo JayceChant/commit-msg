@@ -11,13 +11,13 @@ import (
 func logAndExit(state msgState, v ...interface{}) {
 	if state <= Merge {
 		log.Printf(state.Hint(), v...)
-		os.Exit(0)
 	} else if state <= FileMissing {
-		log.Fatalf(state.Hint(), v...)
+		log.Printf(state.Hint(), v...)
 	} else {
 		log.Printf(state.Hint(), v...)
-		log.Fatalf(Lang.Rule, Types)
+		log.Printf(Lang.Rule, Types)
 	}
+	panic(state)
 }
 
 func getMsg(path string) string {
@@ -134,5 +134,18 @@ func main() {
 
 	msg := getMsg(msgFile)
 
+	defer func() {
+		err := recover()
+		state, ok := err.(msgState)
+		if !ok {
+			panic(err)
+		}
+
+		if state <= Merge {
+			os.Exit(0)
+		} else {
+			os.Exit(int(state))
+		}
+	}()
 	validateMsg(msg)
 }
