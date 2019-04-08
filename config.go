@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	mergePrefix    = `Merge `
+	mergePrefix    = "Merge "
+	revertPattern  = `^(Revert|revert)(:| ).+`
 	headerPattern  = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
 	configFileName = "commit-msg.cfg.json"
 	hookDir        = "./.git/hooks/"

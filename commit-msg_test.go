@@ -11,26 +11,33 @@ func TestGetMsg(t *testing.T) {
 	}
 }
 
+func handleState(t *testing.T, s interface{}, expected msgState) {
+	state, ok := s.(msgState)
+	if !ok || state != expected {
+		t.Errorf("Failed! %v", s)
+	}
+}
+
 func TestValidatedSample(t *testing.T) {
 	defer func() {
-		err := recover()
-		state, ok := err.(msgState)
-		if !ok || state != Validated {
-			t.Errorf("Failed! %v", err)
-		}
+		handleState(t, recover(), Validated)
 	}()
 
 	validateMsg(getMsg("testcase/sample.txt"))
 }
 
-func TestTortoiseGitMerge(t *testing.T) {
+func TestMerge(t *testing.T) {
 	defer func() {
-		err := recover()
-		state, ok := err.(msgState)
-		if !ok || state != Merge {
-			t.Errorf("Failed! %v", err)
-		}
+		handleState(t, recover(), Merge)
 	}()
 
 	validateMsg(getMsg("testcase/tortoiseGitMerge.txt"))
+}
+
+func TestRevert(t *testing.T) {
+	defer func() {
+		handleState(t, recover(), Validated)
+	}()
+
+	validateMsg(getMsg("testcase/tortoiseGitRevert.txt"))
 }

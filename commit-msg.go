@@ -74,8 +74,10 @@ func checkHeader(header string) {
 	checkType(typ)
 
 	isFixupOrSquash := (groups[2] != "")
-	// scope := groups[4] // TODO: 根据配置对scope检查
-	// subject := groups[5] // TODO: 根据规则对subject检查
+	// TODO: 根据配置对scope检查
+	// scope := groups[4]
+	// TODO: 根据规则对subject检查
+	// subject := groups[5]
 
 	length := len(header)
 	if length > Config.LineLimit &&
@@ -115,7 +117,10 @@ func validateMsg(msg string) {
 	}
 
 	sections := strings.SplitN(msg, "\n", 2)
-	checkHeader(sections[0])
+
+	if m, _ := regexp.MatchString(revertPattern, sections[0]); !m {
+		checkHeader(sections[0])
+	}
 
 	if len(sections) == 2 {
 		checkBody(sections[1])
