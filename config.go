@@ -7,28 +7,29 @@ import (
 )
 
 const (
-	MERGE_PREFIX     = `Merge `
-	HEADER_PATTERN   = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
-	CONFIG_FILE_NAME = "commit-msg.cfg.json"
-	HOOK_DIR         = "./.git/hooks/"
+	mergePrefix    = `Merge `
+	headerPattern  = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
+	configFileName = "commit-msg.cfg.json"
+	hookDir        = "./.git/hooks/"
 )
 
-type GlobalConfig struct {
+type globalConfig struct {
 	Lang         string
 	BodyRequired bool
 	LineLimit    int
 }
 
-type LangPack struct {
+type langPack struct {
 	HintList []string
 	Rule     string
 }
 
-type MsgState int
+type msgState int
 
+// message states
 const (
 	// normal state
-	Validated MsgState = iota
+	Validated msgState = iota
 	Merge
 	// non format error
 	ArgumentMissing
@@ -46,8 +47,8 @@ const (
 )
 
 var (
-	Config   *GlobalConfig
-	Lang     *LangPack
+	Config   *globalConfig
+	Lang     *langPack
 	TypeList = [...]string{
 		"feat",     // new feature 新功能
 		"fix",      // fix bug 修复
@@ -63,19 +64,19 @@ var (
 	Types = strings.Join(TypeList[:], ", ")
 )
 
-func (state MsgState) Hint() string {
+func (state msgState) Hint() string {
 	return Lang.HintList[state]
 }
 
 func locateConfig() string {
-	f, err := os.Stat(HOOK_DIR)
+	f, err := os.Stat(hookDir)
 	if err != nil || !f.IsDir() {
-		return CONFIG_FILE_NAME
+		return configFileName
 	}
-	return HOOK_DIR + CONFIG_FILE_NAME
+	return hookDir + configFileName
 }
 
-func loadConfig(path string) *GlobalConfig {
+func loadConfig(path string) *globalConfig {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil
@@ -83,15 +84,15 @@ func loadConfig(path string) *GlobalConfig {
 	defer f.Close()
 
 	dec := json.NewDecoder(f)
-	cfg := GlobalConfig{"en", false, 80}
+	cfg := globalConfig{"en", false, 80}
 	if err := dec.Decode(&cfg); err != nil {
 		return nil
 	}
 	return &cfg
 }
 
-func initConfig(path string) *GlobalConfig {
-	cfg := &GlobalConfig{"en", false, 80}
+func initConfig(path string) *globalConfig {
+	cfg := &globalConfig{"en", false, 80}
 	f, err := os.Create(path)
 	if err != nil {
 		return cfg
@@ -118,7 +119,7 @@ func init() {
 	}
 }
 
-func initLangEn() *LangPack {
+func initLangEn() *langPack {
 	hint := []string{
 		"Validated: commit message meet the rule.\n",
 		"Merge: merge commit detected，skip check.\n",
@@ -146,10 +147,10 @@ if you can not find any error after check, maybe you use Chinese colon, or lack 
 (<scope>), <body> and <footer> are optional
 <type>  must be one of %s
 more specific instructions, please refer to: https://github.com/JayceChant/commit-msg.go`
-	return &LangPack{hint, rule}
+	return &langPack{hint, rule}
 }
 
-func initLangZhCn() *LangPack {
+func initLangZhCn() *langPack {
 	hint := []string{
 		"Validated: 提交信息符合规范。\n",
 		"Merge: 合并提交，跳过规范检查。\n",
@@ -177,5 +178,5 @@ func initLangZhCn() *LangPack {
 (<scope>), <body> 和 <footer> 可选
 <type> 必须是关键字 %s 之一
 更多信息，请参考项目主页: https://github.com/JayceChant/commit-msg.go`
-	return &LangPack{hint, rule}
+	return &langPack{hint, rule}
 }

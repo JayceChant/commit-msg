@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func logAndExit(state MsgState, v ...interface{}) {
+func logAndExit(state msgState, v ...interface{}) {
 	if state <= Merge {
 		log.Printf(state.Hint(), v...)
 		os.Exit(0)
@@ -49,13 +49,13 @@ func checkEmpty(str string) bool {
 	return strings.TrimSpace(str) == ""
 }
 
-func checkType(type_ string) {
+func checkType(typ string) {
 	for _, t := range TypeList {
-		if type_ == t {
+		if typ == t {
 			return
 		}
 	}
-	logAndExit(WrongType, type_, Types)
+	logAndExit(WrongType, typ, Types)
 }
 
 func checkHeader(header string) {
@@ -63,15 +63,15 @@ func checkHeader(header string) {
 		logAndExit(EmptyHeader)
 	}
 
-	re := regexp.MustCompile(HEADER_PATTERN)
+	re := regexp.MustCompile(headerPattern)
 	groups := re.FindStringSubmatch(header)
 
 	if groups == nil || checkEmpty(groups[5]) {
 		logAndExit(BadHeaderFormat, header)
 	}
 
-	type_ := groups[3]
-	checkType(type_)
+	typ := groups[3]
+	checkType(typ)
 
 	isFixupOrSquash := (groups[2] != "")
 	// scope := groups[4] // TODO: 根据配置对scope检查
@@ -79,7 +79,7 @@ func checkHeader(header string) {
 
 	length := len(header)
 	if length > Config.LineLimit &&
-		!(isFixupOrSquash || type_ == "revert" || type_ == "Revert") {
+		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
 		logAndExit(LineOverLong, length, Config.LineLimit, header)
 	}
 }
@@ -110,7 +110,7 @@ func validateMsg(msg string) {
 		logAndExit(EmptyMessage)
 	}
 
-	if strings.HasPrefix(msg, MERGE_PREFIX) {
+	if strings.HasPrefix(msg, mergePrefix) {
 		logAndExit(Merge)
 	}
 
