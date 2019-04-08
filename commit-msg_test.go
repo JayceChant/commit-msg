@@ -11,14 +11,26 @@ func TestGetMsg(t *testing.T) {
 	}
 }
 
-func TestValidateSample(t *testing.T) {
+func TestValidatedSample(t *testing.T) {
 	defer func() {
 		err := recover()
 		state, ok := err.(msgState)
-		if !ok || state > Merge {
+		if !ok || state != Validated {
 			t.Errorf("Failed! %v", err)
 		}
 	}()
 
 	validateMsg(getMsg("testcase/sample.txt"))
+}
+
+func TestTortoiseGitMerge(t *testing.T) {
+	defer func() {
+		err := recover()
+		state, ok := err.(msgState)
+		if !ok || state != Merge {
+			t.Errorf("Failed! %v", err)
+		}
+	}()
+
+	validateMsg(getMsg("testcase/tortoiseGitMerge.txt"))
 }
