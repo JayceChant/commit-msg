@@ -10,7 +10,7 @@ Just put the executable binary into the hook directory of your project which usi
 
 Assuming the project root is `/`, the hook directory should be `/.git/hooks/` . Please make sure the binary is named as `commit-msg` or `commit-msg.exe` (win) , and the executable permission is granted.
 
-If you can't find the hook directory, make sure you have shown the hidden directory.
+If you can't find the hook directory, make sure the hidden directories are shown.
 
 
 
