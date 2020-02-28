@@ -20,7 +20,7 @@ func main() {
 			panic(err)
 		}
 
-		if state <= Merge {
+		if state.IsNormal() {
 			os.Exit(0)
 		} else {
 			os.Exit(int(state))

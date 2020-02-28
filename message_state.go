@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 )
 
@@ -35,13 +36,28 @@ func (state MessageState) Hint() string {
 
 // LogAndExit ...
 func (state MessageState) LogAndExit(v ...interface{}) {
-	if state <= Merge {
+	if state.IsNormal() {
 		log.Printf(state.Hint(), v...)
-	} else if state <= FileMissing {
-		log.Printf(state.Hint(), v...)
-	} else {
+		os.Exit(0)
+	}
+
+	if state.IsFormatError() {
 		log.Printf(state.Hint(), v...)
 		log.Printf(Lang.Rule, Types)
+		os.Exit(int(state))
 	}
-	panic(state)
+
+	// non-format error
+	log.Printf(state.Hint(), v...)
+	os.Exit(int(state))
+}
+
+// IsNormal return if the state a normal state
+func (state MessageState) IsNormal() bool {
+	return state <= Merge
+}
+
+// IsFormatError return if the state a format error
+func (state MessageState) IsFormatError() bool {
+	return state >= EmptyMessage
 }
