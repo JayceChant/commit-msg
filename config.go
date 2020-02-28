@@ -25,31 +25,12 @@ type langPack struct {
 	Rule     string
 }
 
-type msgState int
-
-// message states
-const (
-	// normal state
-	Validated msgState = iota
-	Merge
-	// non format error
-	ArgumentMissing
-	FileMissing
-	ReadError
-	// format error
-	EmptyMessage
-	EmptyHeader
-	BadHeaderFormat
-	WrongType
-	BodyMissing
-	NoBlankLineBeforeBody
-	LineOverLong
-	UndefindedError
-)
-
 var (
-	Config   *globalConfig
-	Lang     *langPack
+	// Config ...
+	Config *globalConfig
+	// Lang ...
+	Lang *langPack
+	// TypeList ...
 	TypeList = [...]string{
 		"feat",     // new feature 新功能
 		"fix",      // fix bug 修复
@@ -62,12 +43,9 @@ var (
 		"revert",   // 撤销以前的 commit
 		"Revert",   // 有些工具生成的 revert 首字母大写
 	}
+	// Types ...
 	Types = strings.Join(TypeList[:], ", ")
 )
-
-func (state msgState) Hint() string {
-	return Lang.HintList[state]
-}
 
 func locateConfig() string {
 	f, err := os.Stat(hookDir)

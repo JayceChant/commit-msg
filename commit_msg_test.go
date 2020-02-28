@@ -3,6 +3,7 @@ package main
 
 import (
 	"testing"
+
 )
 
 func TestGetMsg(t *testing.T) {
@@ -11,8 +12,8 @@ func TestGetMsg(t *testing.T) {
 	}
 }
 
-func handleState(t *testing.T, s interface{}, expected msgState) {
-	state, ok := s.(msgState)
+func handleState(t *testing.T, s interface{}, expected MessageState) {
+	state, ok := s.(MessageState)
 	if !ok || state != expected {
 		t.Errorf("Failed! %v", s)
 	}

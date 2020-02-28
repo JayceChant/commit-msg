@@ -6,40 +6,29 @@ import (
 	"os"
 	"regexp"
 	"strings"
-)
 
-func logAndExit(state msgState, v ...interface{}) {
-	if state <= Merge {
-		log.Printf(state.Hint(), v...)
-	} else if state <= FileMissing {
-		log.Printf(state.Hint(), v...)
-	} else {
-		log.Printf(state.Hint(), v...)
-		log.Printf(Lang.Rule, Types)
-	}
-	panic(state)
-}
+)
 
 func getMsg(path string) string {
 	if path == "" {
-		logAndExit(ArgumentMissing)
+		ArgumentMissing.LogAndExit()
 	}
 
 	f, err := os.Stat(path)
 	if err != nil {
 		log.Println(err)
-		logAndExit(FileMissing, path)
+		FileMissing.LogAndExit(path)
 	}
 
 	if f.IsDir() {
 		log.Println(path, "is not a file.")
-		logAndExit(FileMissing, path)
+		FileMissing.LogAndExit(path)
 	}
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
-		logAndExit(ReadError, path)
+		ReadError.LogAndExit(path)
 	}
 
 	return string(buf)
@@ -55,19 +44,19 @@ func checkType(typ string) {
 			return
 		}
 	}
-	logAndExit(WrongType, typ, Types)
+	WrongType.LogAndExit(typ, Types)
 }
 
 func checkHeader(header string) {
 	if checkEmpty(header) {
-		logAndExit(EmptyHeader)
+		EmptyHeader.LogAndExit()
 	}
 
 	re := regexp.MustCompile(headerPattern)
 	groups := re.FindStringSubmatch(header)
 
 	if groups == nil || checkEmpty(groups[5]) {
-		logAndExit(BadHeaderFormat, header)
+		BadHeaderFormat.LogAndExit(header)
 	}
 
 	typ := groups[3]
@@ -82,38 +71,38 @@ func checkHeader(header string) {
 	length := len(header)
 	if length > Config.LineLimit &&
 		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
-		logAndExit(LineOverLong, length, Config.LineLimit, header)
+		LineOverLong.LogAndExit(length, Config.LineLimit, header)
 	}
 }
 
 func checkBody(body string) {
 	if checkEmpty(body) {
 		if Config.BodyRequired {
-			logAndExit(BodyMissing)
+			BodyMissing.LogAndExit()
 		} else {
-			logAndExit(Validated)
+			Validated.LogAndExit()
 		}
 	}
 
 	if !checkEmpty(strings.SplitN(body, "\n", 2)[0]) {
-		logAndExit(NoBlankLineBeforeBody)
+		NoBlankLineBeforeBody.LogAndExit()
 	}
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
 		if length > Config.LineLimit {
-			logAndExit(LineOverLong, length, Config.LineLimit, line)
+			LineOverLong.LogAndExit(length, Config.LineLimit, line)
 		}
 	}
 }
 
 func validateMsg(msg string) {
 	if checkEmpty(msg) {
-		logAndExit(EmptyMessage)
+		EmptyMessage.LogAndExit()
 	}
 
 	if strings.HasPrefix(msg, mergePrefix) {
-		logAndExit(Merge)
+		Merge.LogAndExit()
 	}
 
 	sections := strings.SplitN(msg, "\n", 2)
@@ -125,32 +114,8 @@ func validateMsg(msg string) {
 	if len(sections) == 2 {
 		checkBody(sections[1])
 	} else if Config.BodyRequired {
-		logAndExit(BodyMissing)
+		BodyMissing.LogAndExit()
 	}
 
-	logAndExit(Validated)
-}
-
-func main() {
-	msgFile := ""
-	if len(os.Args) > 1 {
-		msgFile = os.Args[1]
-	}
-
-	msg := getMsg(msgFile)
-
-	defer func() {
-		err := recover()
-		state, ok := err.(msgState)
-		if !ok {
-			panic(err)
-		}
-
-		if state <= Merge {
-			os.Exit(0)
-		} else {
-			os.Exit(int(state))
-		}
-	}()
-	validateMsg(msg)
+	Validated.LogAndExit()
 }
