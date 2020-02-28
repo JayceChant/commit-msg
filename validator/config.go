@@ -1,4 +1,4 @@
-package main
+package validator
 
 import (
 	"encoding/json"
@@ -9,9 +9,6 @@ import (
 )
 
 const (
-	mergePrefix    = "Merge "
-	revertPattern  = `^(Revert|revert)(:| ).+`
-	headerPattern  = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
 	configFileName = "commit-msg.cfg.json"
 	hookDir        = "./.git/hooks/"
 )
@@ -26,7 +23,7 @@ var (
 	// Config ...
 	Config *globalConfig
 	// TypeList ...
-	TypeList = [...]string{
+	TypeList = []string{
 		"feat",     // new feature 新功能
 		"fix",      // fix bug 修复
 		"docs",     // documentation 文档
@@ -38,7 +35,8 @@ var (
 		"revert",   // 撤销以前的 commit
 		"Revert",   // 有些工具生成的 revert 首字母大写
 	}
-	Types = strings.Join(TypeList[:], ", ")
+	// Types ...
+	Types = strings.Join(TypeList, ", ")
 )
 
 func locateConfig() string {
@@ -96,7 +94,7 @@ func init() {
 }
 
 func initLangEn() *message.LangPack {
-	hint := []string{
+	hints := []string{
 		"Validated: commit message meet the rule.\n",
 		"Merge: merge commit detected，skip check.\n",
 		"Error ArgumentMissing: commit message file argument missing.\n",
@@ -123,11 +121,14 @@ if you can not find any error after check, maybe you use Chinese colon, or lack 
 (<scope>), <body> and <footer> are optional
 <type>  must be one of %s
 more specific instructions, please refer to: https://github.com/JayceChant/commit-msg.go`
-	return &message.LangPack{hint, rule}
+	return &message.LangPack{
+		Hints: hints,
+		Rule:  rule,
+	}
 }
 
 func initLangZhCn() *message.LangPack {
-	hint := []string{
+	hints := []string{
 		"Validated: 提交信息符合规范。\n",
 		"Merge: 合并提交，跳过规范检查。\n",
 		"Error ArgumentMissing: 缺少文件参数。\n",
@@ -154,5 +155,8 @@ func initLangZhCn() *message.LangPack {
 (<scope>), <body> 和 <footer> 可选
 <type> 必须是关键字 %s 之一
 更多信息，请参考项目主页: https://github.com/JayceChant/commit-msg.go`
-	return &message.LangPack{hint, rule}
+	return &message.LangPack{
+		Hints: hints,
+		Rule:  rule,
+	}
 }

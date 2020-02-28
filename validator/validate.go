@@ -1,4 +1,4 @@
-package main
+package validator
 
 import (
 	"io/ioutil"
@@ -10,6 +10,32 @@ import (
 	"github.com/JayceChant/commit-msg/message"
 
 )
+
+const (
+	mergePrefix   = "Merge "
+	revertPattern = `^(Revert|revert)(:| ).+`
+	headerPattern = `^((fixup! |squash! )?(\w+)(?:\(([^\)\s]+)\))?: (.+))(?:\n|$)`
+)
+
+// Validate ...
+func Validate(file string) {
+	msg := getMsg(file)
+
+	defer func() {
+		err := recover()
+		state, ok := err.(message.State)
+		if !ok {
+			panic(err)
+		}
+
+		if state.IsNormal() {
+			os.Exit(0)
+		} else {
+			os.Exit(int(state))
+		}
+	}()
+	validateMsg(msg)
+}
 
 func getMsg(path string) string {
 	if path == "" {
