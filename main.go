@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/JayceChant/commit-msg/message"
+
 )
 
 func main() {
@@ -15,7 +17,7 @@ func main() {
 
 	defer func() {
 		err := recover()
-		state, ok := err.(MessageState)
+		state, ok := err.(message.State)
 		if !ok {
 			panic(err)
 		}

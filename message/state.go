@@ -1,4 +1,4 @@
-package main
+package message
 
 import (
 	"log"
@@ -6,13 +6,13 @@ import (
 
 )
 
-// MessageState indicate the state of a commit message
-type MessageState int
+// State indicate the state of a commit message
+type State int
 
 // message states
 const (
 	// normal state
-	Validated MessageState = iota
+	Validated State = iota
 	Merge
 	// non format error
 	ArgumentMissing
@@ -30,12 +30,12 @@ const (
 )
 
 // Hint ...
-func (state MessageState) Hint() string {
-	return Lang.HintList[state]
+func (state State) Hint() string {
+	return Lang.Hints[state]
 }
 
 // LogAndExit ...
-func (state MessageState) LogAndExit(v ...interface{}) {
+func (state State) LogAndExit(v ...interface{}) {
 	if state.IsNormal() {
 		log.Printf(state.Hint(), v...)
 		os.Exit(0)
@@ -53,11 +53,11 @@ func (state MessageState) LogAndExit(v ...interface{}) {
 }
 
 // IsNormal return if the state a normal state
-func (state MessageState) IsNormal() bool {
+func (state State) IsNormal() bool {
 	return state <= Merge
 }
 
 // IsFormatError return if the state a format error
-func (state MessageState) IsFormatError() bool {
+func (state State) IsFormatError() bool {
 	return state >= EmptyMessage
 }

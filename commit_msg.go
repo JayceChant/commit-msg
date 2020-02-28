@@ -7,28 +7,30 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/JayceChant/commit-msg/message"
+
 )
 
 func getMsg(path string) string {
 	if path == "" {
-		ArgumentMissing.LogAndExit()
+		message.ArgumentMissing.LogAndExit()
 	}
 
 	f, err := os.Stat(path)
 	if err != nil {
 		log.Println(err)
-		FileMissing.LogAndExit(path)
+		message.FileMissing.LogAndExit(path)
 	}
 
 	if f.IsDir() {
 		log.Println(path, "is not a file.")
-		FileMissing.LogAndExit(path)
+		message.FileMissing.LogAndExit(path)
 	}
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
-		ReadError.LogAndExit(path)
+		message.ReadError.LogAndExit(path)
 	}
 
 	return string(buf)
@@ -44,19 +46,19 @@ func checkType(typ string) {
 			return
 		}
 	}
-	WrongType.LogAndExit(typ, Types)
+	message.WrongType.LogAndExit(typ, Types)
 }
 
 func checkHeader(header string) {
 	if checkEmpty(header) {
-		EmptyHeader.LogAndExit()
+		message.EmptyHeader.LogAndExit()
 	}
 
 	re := regexp.MustCompile(headerPattern)
 	groups := re.FindStringSubmatch(header)
 
 	if groups == nil || checkEmpty(groups[5]) {
-		BadHeaderFormat.LogAndExit(header)
+		message.BadHeaderFormat.LogAndExit(header)
 	}
 
 	typ := groups[3]
@@ -71,38 +73,38 @@ func checkHeader(header string) {
 	length := len(header)
 	if length > Config.LineLimit &&
 		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
-		LineOverLong.LogAndExit(length, Config.LineLimit, header)
+		message.LineOverLong.LogAndExit(length, Config.LineLimit, header)
 	}
 }
 
 func checkBody(body string) {
 	if checkEmpty(body) {
 		if Config.BodyRequired {
-			BodyMissing.LogAndExit()
+			message.BodyMissing.LogAndExit()
 		} else {
-			Validated.LogAndExit()
+			message.Validated.LogAndExit()
 		}
 	}
 
 	if !checkEmpty(strings.SplitN(body, "\n", 2)[0]) {
-		NoBlankLineBeforeBody.LogAndExit()
+		message.NoBlankLineBeforeBody.LogAndExit()
 	}
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
 		if length > Config.LineLimit {
-			LineOverLong.LogAndExit(length, Config.LineLimit, line)
+			message.LineOverLong.LogAndExit(length, Config.LineLimit, line)
 		}
 	}
 }
 
 func validateMsg(msg string) {
 	if checkEmpty(msg) {
-		EmptyMessage.LogAndExit()
+		message.EmptyMessage.LogAndExit()
 	}
 
 	if strings.HasPrefix(msg, mergePrefix) {
-		Merge.LogAndExit()
+		message.Merge.LogAndExit()
 	}
 
 	sections := strings.SplitN(msg, "\n", 2)
@@ -114,8 +116,8 @@ func validateMsg(msg string) {
 	if len(sections) == 2 {
 		checkBody(sections[1])
 	} else if Config.BodyRequired {
-		BodyMissing.LogAndExit()
+		message.BodyMissing.LogAndExit()
 	}
 
-	Validated.LogAndExit()
+	message.Validated.LogAndExit()
 }

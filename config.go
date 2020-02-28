@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
+
+	"github.com/JayceChant/commit-msg/message"
 )
 
 const (
@@ -20,16 +22,9 @@ type globalConfig struct {
 	LineLimit    int
 }
 
-type langPack struct {
-	HintList []string
-	Rule     string
-}
-
 var (
 	// Config ...
 	Config *globalConfig
-	// Lang ...
-	Lang *langPack
 	// TypeList ...
 	TypeList = [...]string{
 		"feat",     // new feature 新功能
@@ -43,7 +38,6 @@ var (
 		"revert",   // 撤销以前的 commit
 		"Revert",   // 有些工具生成的 revert 首字母大写
 	}
-	// Types ...
 	Types = strings.Join(TypeList[:], ", ")
 )
 
@@ -90,15 +84,18 @@ func init() {
 		Config = initConfig(path)
 	}
 
+	var l *message.LangPack
 	switch Config.Lang {
 	case "zh", "zh-CN":
-		Lang = initLangZhCn()
+		l = initLangZhCn()
 	default:
-		Lang = initLangEn()
+		l = initLangEn()
 	}
+
+	message.Config(l, Types)
 }
 
-func initLangEn() *langPack {
+func initLangEn() *message.LangPack {
 	hint := []string{
 		"Validated: commit message meet the rule.\n",
 		"Merge: merge commit detected，skip check.\n",
@@ -126,10 +123,10 @@ if you can not find any error after check, maybe you use Chinese colon, or lack 
 (<scope>), <body> and <footer> are optional
 <type>  must be one of %s
 more specific instructions, please refer to: https://github.com/JayceChant/commit-msg.go`
-	return &langPack{hint, rule}
+	return &message.LangPack{hint, rule}
 }
 
-func initLangZhCn() *langPack {
+func initLangZhCn() *message.LangPack {
 	hint := []string{
 		"Validated: 提交信息符合规范。\n",
 		"Merge: 合并提交，跳过规范检查。\n",
@@ -157,5 +154,5 @@ func initLangZhCn() *langPack {
 (<scope>), <body> 和 <footer> 可选
 <type> 必须是关键字 %s 之一
 更多信息，请参考项目主页: https://github.com/JayceChant/commit-msg.go`
-	return &langPack{hint, rule}
+	return &message.LangPack{hint, rule}
 }
