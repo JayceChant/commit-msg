@@ -1,10 +1,23 @@
-package message
+package state
 
 import (
 	"log"
 	"os"
 
 )
+
+var (
+	// Lang ...
+	Lang *LangPack
+	// Types ...
+	Types string
+)
+
+// Config ...
+func Config(l *LangPack, t string) {
+	Lang = l
+	Types = t
+}
 
 // State indicate the state of a commit message
 type State int

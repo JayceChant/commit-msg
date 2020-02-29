@@ -1,4 +1,4 @@
-package message
+package state
 
 // LangPack ...
 type LangPack struct {

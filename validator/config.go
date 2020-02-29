@@ -5,7 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/JayceChant/commit-msg/message"
+	"github.com/JayceChant/commit-msg/state"
+
 )
 
 const (
@@ -82,7 +83,7 @@ func init() {
 		Config = initConfig(path)
 	}
 
-	var l *message.LangPack
+	var l *state.LangPack
 	switch Config.Lang {
 	case "zh", "zh-CN":
 		l = initLangZhCn()
@@ -90,10 +91,10 @@ func init() {
 		l = initLangEn()
 	}
 
-	message.Config(l, Types)
+	state.Config(l, Types)
 }
 
-func initLangEn() *message.LangPack {
+func initLangEn() *state.LangPack {
 	hints := []string{
 		"Validated: commit message meet the rule.\n",
 		"Merge: merge commit detected，skip check.\n",
@@ -121,13 +122,13 @@ if you can not find any error after check, maybe you use Chinese colon, or lack 
 (<scope>), <body> and <footer> are optional
 <type>  must be one of %s
 more specific instructions, please refer to: https://github.com/JayceChant/commit-msg.go`
-	return &message.LangPack{
+	return &state.LangPack{
 		Hints: hints,
 		Rule:  rule,
 	}
 }
 
-func initLangZhCn() *message.LangPack {
+func initLangZhCn() *state.LangPack {
 	hints := []string{
 		"Validated: 提交信息符合规范。\n",
 		"Merge: 合并提交，跳过规范检查。\n",
@@ -155,7 +156,7 @@ func initLangZhCn() *message.LangPack {
 (<scope>), <body> 和 <footer> 可选
 <type> 必须是关键字 %s 之一
 更多信息，请参考项目主页: https://github.com/JayceChant/commit-msg.go`
-	return &message.LangPack{
+	return &state.LangPack{
 		Hints: hints,
 		Rule:  rule,
 	}

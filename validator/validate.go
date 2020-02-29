@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/JayceChant/commit-msg/message"
+	"github.com/JayceChant/commit-msg/state"
 
 )
 
@@ -23,7 +23,7 @@ func Validate(file string) {
 
 	defer func() {
 		err := recover()
-		state, ok := err.(message.State)
+		state, ok := err.(state.State)
 		if !ok {
 			panic(err)
 		}
@@ -39,24 +39,24 @@ func Validate(file string) {
 
 func getMsg(path string) string {
 	if path == "" {
-		message.ArgumentMissing.LogAndExit()
+		state.ArgumentMissing.LogAndExit()
 	}
 
 	f, err := os.Stat(path)
 	if err != nil {
 		log.Println(err)
-		message.FileMissing.LogAndExit(path)
+		state.FileMissing.LogAndExit(path)
 	}
 
 	if f.IsDir() {
 		log.Println(path, "is not a file.")
-		message.FileMissing.LogAndExit(path)
+		state.FileMissing.LogAndExit(path)
 	}
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
-		message.ReadError.LogAndExit(path)
+		state.ReadError.LogAndExit(path)
 	}
 
 	return string(buf)
@@ -72,19 +72,19 @@ func checkType(typ string) {
 			return
 		}
 	}
-	message.WrongType.LogAndExit(typ, Types)
+	state.WrongType.LogAndExit(typ, Types)
 }
 
 func checkHeader(header string) {
 	if checkEmpty(header) {
-		message.EmptyHeader.LogAndExit()
+		state.EmptyHeader.LogAndExit()
 	}
 
 	re := regexp.MustCompile(headerPattern)
 	groups := re.FindStringSubmatch(header)
 
 	if groups == nil || checkEmpty(groups[5]) {
-		message.BadHeaderFormat.LogAndExit(header)
+		state.BadHeaderFormat.LogAndExit(header)
 	}
 
 	typ := groups[3]
@@ -99,38 +99,38 @@ func checkHeader(header string) {
 	length := len(header)
 	if length > Config.LineLimit &&
 		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
-		message.LineOverLong.LogAndExit(length, Config.LineLimit, header)
+		state.LineOverLong.LogAndExit(length, Config.LineLimit, header)
 	}
 }
 
 func checkBody(body string) {
 	if checkEmpty(body) {
 		if Config.BodyRequired {
-			message.BodyMissing.LogAndExit()
+			state.BodyMissing.LogAndExit()
 		} else {
-			message.Validated.LogAndExit()
+			state.Validated.LogAndExit()
 		}
 	}
 
 	if !checkEmpty(strings.SplitN(body, "\n", 2)[0]) {
-		message.NoBlankLineBeforeBody.LogAndExit()
+		state.NoBlankLineBeforeBody.LogAndExit()
 	}
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
 		if length > Config.LineLimit {
-			message.LineOverLong.LogAndExit(length, Config.LineLimit, line)
+			state.LineOverLong.LogAndExit(length, Config.LineLimit, line)
 		}
 	}
 }
 
 func validateMsg(msg string) {
 	if checkEmpty(msg) {
-		message.EmptyMessage.LogAndExit()
+		state.EmptyMessage.LogAndExit()
 	}
 
 	if strings.HasPrefix(msg, mergePrefix) {
-		message.Merge.LogAndExit()
+		state.Merge.LogAndExit()
 	}
 
 	sections := strings.SplitN(msg, "\n", 2)
@@ -142,8 +142,8 @@ func validateMsg(msg string) {
 	if len(sections) == 2 {
 		checkBody(sections[1])
 	} else if Config.BodyRequired {
-		message.BodyMissing.LogAndExit()
+		state.BodyMissing.LogAndExit()
 	}
 
-	message.Validated.LogAndExit()
+	state.Validated.LogAndExit()
 }
