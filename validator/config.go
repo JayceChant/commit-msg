@@ -2,15 +2,18 @@ package validator
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/JayceChant/commit-msg/state"
+	homedir "github.com/mitchellh/go-homedir"
 
 )
 
 const (
-	configFileName = "commit-msg.cfg.json"
+	configFileName = ".commit-msg.json"
 	hookDir        = "./.git/hooks/"
 )
 
@@ -22,7 +25,7 @@ type globalConfig struct {
 
 var (
 	// Config ...
-	Config *globalConfig
+	Config *globalConfig = &globalConfig{Lang: "en", BodyRequired: false, LineLimit: 80}
 	// TypeList ...
 	TypeList = []string{
 		"feat",     // new feature 新功能
@@ -40,48 +43,59 @@ var (
 	Types = strings.Join(TypeList, ", ")
 )
 
-func locateConfig() string {
+func locateConfigs() []string {
+	cfgs := make([]string, 0)
+	if home, err := homedir.Dir(); err == nil {
+		cfgs = append(cfgs, path.Join(home, configFileName))
+	}
+
 	f, err := os.Stat(hookDir)
-	if err != nil || !f.IsDir() {
-		return configFileName
+	if err == nil && f.IsDir() {
+		// working dir is on project root
+		cfgs = append(cfgs, path.Join(hookDir, configFileName))
+	} else {
+		// work around for test
+		cfgs = append(cfgs, configFileName)
 	}
-	return hookDir + configFileName
+	return cfgs
 }
 
-func loadConfig(path string) *globalConfig {
+func loadConfig(path string, cfg *globalConfig) *globalConfig {
 	f, err := os.Open(path)
-	if err != nil {
-		return nil
-	}
-	defer f.Close()
-
-	dec := json.NewDecoder(f)
-	cfg := globalConfig{"en", false, 80}
-	if err := dec.Decode(&cfg); err != nil {
-		return nil
-	}
-	return &cfg
-}
-
-func initConfig(path string) *globalConfig {
-	cfg := &globalConfig{"en", false, 80}
-	f, err := os.Create(path)
 	if err != nil {
 		return cfg
 	}
 	defer f.Close()
-	enc := json.NewEncoder(f)
-	enc.SetIndent("", "    ")
-	enc.Encode(cfg)
+
+	dec := json.NewDecoder(f)
+	if err := dec.Decode(cfg); err != nil {
+		fmt.Println(err)
+	}
 	return cfg
 }
 
+// func initConfig(path string) *globalConfig {
+// 	cfg := &globalConfig{"en", false, 80}
+// 	f, err := os.Create(path)
+// 	if err != nil {
+// 		return cfg
+// 	}
+// 	defer f.Close()
+// 	enc := json.NewEncoder(f)
+// 	enc.SetIndent("", "    ")
+// 	enc.Encode(cfg)
+// 	return cfg
+// }
+
 func init() {
-	path := locateConfig()
-	Config = loadConfig(path)
-	if Config == nil {
-		Config = initConfig(path)
+	paths := locateConfigs()
+	for _, p := range paths {
+		// TODO: fix json value overlaping
+		Config = loadConfig(p, Config)
 	}
+	// if Config == nil {
+	// 	Config = initConfig(path)
+	// }
 
 	var l *state.LangPack
 	switch Config.Lang {

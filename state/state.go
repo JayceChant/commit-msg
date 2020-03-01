@@ -7,16 +7,16 @@ import (
 )
 
 var (
-	// Lang ...
-	Lang *LangPack
-	// Types ...
-	Types string
+	lang  *LangPack
+	types string
+	// type check
+	_ error = State(0)
 )
 
 // Config ...
 func Config(l *LangPack, t string) {
-	Lang = l
-	Types = t
+	lang = l
+	types = t
 }
 
 // State indicate the state of a commit message
@@ -42,26 +42,26 @@ const (
 	UndefindedError
 )
 
-// Hint ...
-func (state State) Hint() string {
-	return Lang.Hints[state]
+// Error ...
+func (state State) Error() string {
+	return lang.Hints[state]
 }
 
 // LogAndExit ...
 func (state State) LogAndExit(v ...interface{}) {
 	if state.IsNormal() {
-		log.Printf(state.Hint(), v...)
+		log.Printf(state.Error(), v...)
 		os.Exit(0)
 	}
 
 	if state.IsFormatError() {
-		log.Printf(state.Hint(), v...)
-		log.Printf(Lang.Rule, Types)
+		log.Printf(state.Error(), v...)
+		log.Printf(lang.Rule, types)
 		os.Exit(int(state))
 	}
 
 	// non-format error
-	log.Printf(state.Hint(), v...)
+	log.Printf(state.Error(), v...)
 	os.Exit(int(state))
 }
 
