@@ -19,8 +19,6 @@ const (
 
 // Validate ...
 func Validate(file string) {
-	msg := getMsg(file)
-
 	defer func() {
 		err := recover()
 		state, ok := err.(state.State)
@@ -34,7 +32,8 @@ func Validate(file string) {
 			os.Exit(int(state))
 		}
 	}()
-	validateMsg(msg)
+
+	validateMsg(getMsg(file), Config)
 }
 
 func getMsg(path string) string {
@@ -75,7 +74,7 @@ func checkType(typ string) {
 	state.WrongType.LogAndExit(typ, Types)
 }
 
-func checkHeader(header string) {
+func checkHeader(header string, config *globalConfig) {
 	if checkEmpty(header) {
 		state.EmptyHeader.LogAndExit()
 	}
@@ -97,15 +96,15 @@ func checkHeader(header string) {
 	// subject := groups[5]
 
 	length := len(header)
-	if length > Config.LineLimit &&
+	if length > config.LineLimit &&
 		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
-		state.LineOverLong.LogAndExit(length, Config.LineLimit, header)
+		state.LineOverLong.LogAndExit(length, config.LineLimit, header)
 	}
 }
 
-func checkBody(body string) {
+func checkBody(body string, config *globalConfig) {
 	if checkEmpty(body) {
-		if Config.BodyRequired {
+		if config.BodyRequired {
 			state.BodyMissing.LogAndExit()
 		} else {
 			state.Validated.LogAndExit()
@@ -118,13 +117,13 @@ func checkBody(body string) {
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
-		if length > Config.LineLimit {
-			state.LineOverLong.LogAndExit(length, Config.LineLimit, line)
+		if length > config.LineLimit {
+			state.LineOverLong.LogAndExit(length, config.LineLimit, line)
 		}
 	}
 }
 
-func validateMsg(msg string) {
+func validateMsg(msg string, config *globalConfig) {
 	if checkEmpty(msg) {
 		state.EmptyMessage.LogAndExit()
 	}
@@ -136,12 +135,12 @@ func validateMsg(msg string) {
 	sections := strings.SplitN(msg, "\n", 2)
 
 	if m, _ := regexp.MatchString(revertPattern, sections[0]); !m {
-		checkHeader(sections[0])
+		checkHeader(sections[0], config)
 	}
 
 	if len(sections) == 2 {
-		checkBody(sections[1])
-	} else if Config.BodyRequired {
+		checkBody(sections[1], config)
+	} else if config.BodyRequired {
 		state.BodyMissing.LogAndExit()
 	}
 
