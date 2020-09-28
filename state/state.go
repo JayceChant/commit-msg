@@ -3,7 +3,6 @@ package state
 import (
 	"log"
 	"os"
-
 )
 
 var (
@@ -13,9 +12,12 @@ var (
 	_ error = State(0)
 )
 
-// Config ...
-func Config(l *LangPack, t string) {
-	lang = l
+// Init ...
+func Init(l string, t string) {
+	var ok bool
+	if lang, ok = langs[l]; !ok {
+		lang = langEn
+	}
 	types = t
 }
 
