@@ -3,7 +3,7 @@ LDFLAGS += -s -w
 
 .PHONY: all build upx
 
-all: build
+all: build upx
 
 build:
 	go build -trimpath -ldflags '$(LDFLAGS)'
