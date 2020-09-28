@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/JayceChant/commit-msg/state"
-
 )
 
 const (
@@ -66,12 +65,12 @@ func checkEmpty(str string) bool {
 }
 
 func checkType(typ string) {
-	for _, t := range TypeList {
+	for t := range TypeSet {
 		if typ == t {
 			return
 		}
 	}
-	state.WrongType.LogAndExit(typ, Types)
+	state.WrongType.LogAndExit(typ, TypesStr)
 }
 
 func checkHeader(header string, config *globalConfig) {

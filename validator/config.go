@@ -9,7 +9,6 @@ import (
 
 	"github.com/JayceChant/commit-msg/state"
 	homedir "github.com/mitchellh/go-homedir"
-
 )
 
 const (
@@ -18,29 +17,31 @@ const (
 )
 
 type globalConfig struct {
-	Lang         string
-	BodyRequired bool
-	LineLimit    int
+	Lang         string   `json:"lang"`
+	BodyRequired bool     `json:"bodyRequired"`
+	LineLimit    int      `json:"lineLimit"`
+	Types        []string `json:"types,omitempty"`
+	DenyTypes    []string `json:"denyTypes,omitempty"`
 }
 
 var (
 	// Config ...
 	Config *globalConfig = &globalConfig{Lang: "en", BodyRequired: false, LineLimit: 80}
-	// TypeList ...
-	TypeList = []string{
-		"feat",     // new feature 新功能
-		"fix",      // fix bug 修复
-		"docs",     // documentation 文档
-		"style",    // changes not affect logic 格式（不影响代码运行的变动）
-		"refactor", // 重构（既不是新增功能，也不是修改bug的代码变动）
-		"perf",     // performance 提升性能
-		"test",     // 增加测试
-		"chore",    // 构建过程或辅助工具的变动'
-		"revert",   // 撤销以前的 commit
-		"Revert",   // 有些工具生成的 revert 首字母大写
+	// TypeSet ...
+	TypeSet = map[string]bool{
+		"feat":     true, // new feature 新功能
+		"fix":      true, // fix bug 修复
+		"docs":     true, // documentation 文档
+		"style":    true, // changes not affect logic 格式（不影响代码运行的变动）
+		"refactor": true, // 重构（既不是新增功能，也不是修改bug的代码变动）
+		"perf":     true, // performance 提升性能
+		"test":     true, // 增加测试
+		"chore":    true, // 构建过程或辅助工具的变动'
+		"revert":   true, // 撤销以前的 commit
+		"Revert":   true, // 有些工具生成的 revert 首字母大写
 	}
-	// Types ...
-	Types = strings.Join(TypeList, ", ")
+	// TypesStr ...
+	TypesStr string
 )
 
 func locateConfigs() []string {
@@ -50,7 +51,7 @@ func locateConfigs() []string {
 	}
 
 	f, err := os.Stat(hookDir)
-	if err == nil && f.IsDir() {
+	if (err == nil || os.IsExist(err)) && f.IsDir() {
 		// working dir is on project root
 		cfgs = append(cfgs, path.Join(hookDir, configFileName))
 	} else {
@@ -105,7 +106,25 @@ func init() {
 		l = initLangEn()
 	}
 
-	state.Config(l, Types)
+	if Config.Types != nil {
+		for _, t := range Config.Types {
+			TypeSet[t] = true
+		}
+	}
+
+	if Config.DenyTypes != nil {
+		for _, t := range Config.DenyTypes {
+			delete(TypeSet, t)
+		}
+	}
+
+	types := make([]string, 0, len(TypeSet))
+	for t := range TypeSet {
+		types = append(types, t)
+	}
+	TypesStr = strings.Join(types, ", ")
+
+	state.Config(l, TypesStr)
 }
 
 func initLangEn() *state.LangPack {
