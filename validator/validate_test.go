@@ -11,12 +11,14 @@ import (
 )
 
 var (
-	config = &globalConfig{Lang: "en", BodyRequired: true, LineLimit: 80}
+	defaultCfg      = &globalConfig{Lang: "en", BodyRequired: true, LineLimit: 80}
+	scopeRequired   = &globalConfig{ScopeRequired: true}
+	scopesSpecified = &globalConfig{Scopes: []string{"model", "view", "controller"}}
 )
 
-func assertExitCode(t *testing.T, f func(), flag string, expected int) {
+func assertExitCode(t *testing.T, f func(), name string, expected int) {
 	if env := os.Getenv("TEST_RUNNER"); env != "" {
-		if env == flag {
+		if env == name {
 			f()
 		}
 		return
@@ -28,24 +30,24 @@ func assertExitCode(t *testing.T, f func(), flag string, expected int) {
 	nn := strings.Split(ft.Name(), ".")
 
 	cmd := exec.Command(os.Args[0], "-test.run=^("+nn[len(nn)-1]+")$")
-	cmd.Env = append(os.Environ(), "TEST_RUNNER="+flag)
+	cmd.Env = append(os.Environ(), "TEST_RUNNER="+name)
 	err := cmd.Run()
 	e, ok := err.(*exec.ExitError)
 
 	if expected == 0 {
 		if ok && e.ExitCode() != 0 {
-			t.Errorf("exit code got %d, expected %d", e.ExitCode(), 0)
+			t.Errorf("%s: exit code got %d, expected 0", name, e.ExitCode())
 		}
 		return
 	}
 
 	if !ok {
-		t.Errorf("expect ExitError with code %d, got err %v", expected, err)
+		t.Errorf("%s: expect ExitError with code %d, got err %v", name, expected, err)
 		return
 	}
 
 	if e.ExitCode() != expected {
-		t.Errorf("exit code got %d, expected %d", e.ExitCode(), expected)
+		t.Errorf("%s: exit code got %d, expected %d", name, e.ExitCode(), expected)
 	}
 }
 
@@ -65,8 +67,8 @@ func TestGetMsg(t *testing.T) {
 	}, "Normal", 0)
 }
 
-var (
-	emptyCases = []struct {
+func TestCheckEmpty(t *testing.T) {
+	var emptyCases = []struct {
 		text string
 		want bool
 	}{
@@ -76,9 +78,6 @@ var (
 		{"\n\r\t", true},
 		{"  some words ", false},
 	}
-)
-
-func TestCheckEmpty(t *testing.T) {
 	for _, tt := range emptyCases {
 		t.Run("checkEmpty", func(t *testing.T) {
 			if got := checkEmpty(tt.text); got != tt.want {
@@ -102,31 +101,31 @@ func TestCheckType(t *testing.T) {
 	}, "wrong_type", int(state.WrongType))
 }
 
-var (
-	headerCases = []struct {
-		text string
-		name string
-		want int
-	}{
-		{"", "empty_header", int(state.EmptyHeader)},
-		{"\r\r\t\n", "empty_header2", int(state.EmptyHeader)},
-		{"something in wrong format", "bad_header_format", int(state.BadHeaderFormat)},
-		{"test:header without space after colon", "bad_header_no_colon", int(state.BadHeaderFormat)},
-		{"test：Chinese(full width) colon", "bad_header_full_width", int(state.BadHeaderFormat)},
-		{"test: ", "bad_header_no_title", int(state.BadHeaderFormat)},
-	}
-)
-
 func TestCheckHeader(t *testing.T) {
+	var headerCases = []struct {
+		text   string
+		name   string
+		config *globalConfig
+		want   int
+	}{
+		{"", "empty_header", defaultCfg, int(state.EmptyHeader)},
+		{"\r\r\t\n", "empty_header2", defaultCfg, int(state.EmptyHeader)},
+		{"something in wrong format", "bad_header_format", defaultCfg, int(state.BadHeaderFormat)},
+		{"test:header without space after colon", "bad_header_no_colon", defaultCfg, int(state.BadHeaderFormat)},
+		{"test：Chinese(full width) colon", "bad_header_full_width", defaultCfg, int(state.BadHeaderFormat)},
+		{"test: ", "bad_header_no_title", defaultCfg, int(state.BadHeaderFormat)},
+		{"feat: something changes", "scope_missing", scopeRequired, int(state.ScopeMissing)},
+		{"feat( ): something changes", "empty_scope", scopeRequired, int(state.BadHeaderFormat)},
+	}
 	for _, tt := range headerCases {
 		assertExitCode(t, func() {
-			checkHeader(tt.text, config)
+			checkHeader(tt.text, tt.config)
 		}, tt.name, tt.want)
 	}
 }
 
-var (
-	bodyCases = []struct {
+func TestCheckBody(t *testing.T) {
+	var bodyCases = []struct {
 		text string
 		name string
 		want int
@@ -136,12 +135,9 @@ var (
 		{"\r\na body with too looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line", "line_over_long", int(state.LineOverLong)},
 		{"\r\nnormal body", "normal", 0},
 	}
-)
-
-func TestCheckBody(t *testing.T) {
 	for _, tt := range bodyCases {
 		assertExitCode(t, func() {
-			checkBody(tt.text, config)
+			checkBody(tt.text, defaultCfg)
 		}, tt.name, tt.want)
 	}
 }
@@ -154,12 +150,32 @@ func TestValidate(t *testing.T) {
 
 func TestTortoiseGit(t *testing.T) {
 	assertExitCode(t, func() {
-		validateMsg("Merge remote-tracking branch 'remotes/origin/feat_xyz'", config)
+		validateMsg("Merge remote-tracking branch 'remotes/origin/feat_xyz'", defaultCfg)
 	}, "Merge", 0)
 
 	assertExitCode(t, func() {
 		validateMsg(`Revert "fix: abc issue & xyz problems, some words to make it lonnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnger"
 
-This reverts commit 1234567890abcdef1234567890abcdef12345678.`, config)
+This reverts commit 1234567890abcdef1234567890abcdef12345678.`, defaultCfg)
 	}, "Revert", 0)
+}
+
+func TestCheckScope(t *testing.T) {
+	var scopeCases = []struct {
+		text   string
+		name   string
+		config *globalConfig
+		want   int
+	}{
+		{"model", "normal", scopeRequired, 0},
+		{"", "empty_but_not_required", defaultCfg, 0},
+		{"", "empty_scope", scopeRequired, int(state.ScopeMissing)},
+		{"model", "scope_in_range", scopesSpecified, 0},
+		{"module", "wrong_scope", scopesSpecified, int(state.WrongScope)},
+	}
+	for _, tt := range scopeCases {
+		assertExitCode(t, func() {
+			checkScope(tt.text, tt.config)
+		}, tt.name, tt.want)
+	}
 }

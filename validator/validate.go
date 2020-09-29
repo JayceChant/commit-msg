@@ -73,6 +73,26 @@ func checkType(typ string) {
 	state.WrongType.LogAndExit(typ, TypesStr)
 }
 
+func checkScope(scope string, config *globalConfig) {
+	if checkEmpty(scope) {
+		if config.ScopeRequired {
+			state.ScopeMissing.LogAndExit()
+		}
+		return
+	}
+
+	if len(config.Scopes) == 0 {
+		return
+	}
+
+	for _, s := range config.Scopes {
+		if scope == s {
+			return
+		}
+	}
+	state.WrongScope.LogAndExit(scope, strings.Join(config.Scopes, ", "))
+}
+
 func checkHeader(header string, config *globalConfig) {
 	if checkEmpty(header) {
 		state.EmptyHeader.LogAndExit()
@@ -89,11 +109,15 @@ func checkHeader(header string, config *globalConfig) {
 	checkType(typ)
 
 	isFixupOrSquash := (groups[2] != "")
-	// TODO: 根据配置对scope检查
-	// scope := groups[4]
+
+	checkScope(groups[4], config)
+
 	// TODO: 根据规则对subject检查
 	// subject := groups[5]
 
+	if config.LineLimit <= 0 {
+		config.LineLimit = 80
+	}
 	length := len(header)
 	if length > config.LineLimit &&
 		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
@@ -114,6 +138,9 @@ func checkBody(body string, config *globalConfig) {
 		state.NoBlankLineBeforeBody.LogAndExit()
 	}
 
+	if config.LineLimit <= 0 {
+		config.LineLimit = 80
+	}
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
 		if length > config.LineLimit {

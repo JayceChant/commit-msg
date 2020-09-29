@@ -17,11 +17,13 @@ const (
 )
 
 type globalConfig struct {
-	Lang         string   `json:"lang,omitempty"`
-	BodyRequired bool     `json:"bodyRequired,omitempty"`
-	LineLimit    int      `json:"lineLimit,omitempty"`
-	Types        []string `json:"types,omitempty"`
-	DenyTypes    []string `json:"denyTypes,omitempty"`
+	Lang          string   `json:"lang,omitempty"`
+	BodyRequired  bool     `json:"bodyRequired,omitempty"`
+	LineLimit     int      `json:"lineLimit,omitempty"`
+	Types         []string `json:"types,omitempty"`
+	DenyTypes     []string `json:"denyTypes,omitempty"`
+	ScopeRequired bool     `json:"scopeRequired,omitempty"`
+	Scopes        []string `json:"scopes,omitempty"`
 }
 
 var (
@@ -98,16 +100,12 @@ func init() {
 	// 	Config = initConfig(path)
 	// }
 
-	if Config.Types != nil {
-		for _, t := range Config.Types {
-			TypeSet[t] = true
-		}
+	for _, t := range Config.Types {
+		TypeSet[t] = true
 	}
 
-	if Config.DenyTypes != nil {
-		for _, t := range Config.DenyTypes {
-			delete(TypeSet, t)
-		}
+	for _, t := range Config.DenyTypes {
+		delete(TypeSet, t)
 	}
 
 	types := make([]string, 0, len(TypeSet))

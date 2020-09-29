@@ -38,6 +38,8 @@ const (
 	EmptyHeader
 	BadHeaderFormat
 	WrongType
+	ScopeMissing
+	WrongScope
 	BodyMissing
 	NoBlankLineBeforeBody
 	LineOverLong
@@ -51,19 +53,16 @@ func (state State) Error() string {
 
 // LogAndExit ...
 func (state State) LogAndExit(v ...interface{}) {
+	log.Printf(state.Error(), v...)
+
 	if state.IsNormal() {
-		log.Printf(state.Error(), v...)
 		os.Exit(0)
 	}
 
 	if state.IsFormatError() {
-		log.Printf(state.Error(), v...)
 		log.Printf(lang.Rule, types)
-		os.Exit(int(state))
 	}
 
-	// non-format error
-	log.Printf(state.Error(), v...)
 	os.Exit(int(state))
 }
 
