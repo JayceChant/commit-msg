@@ -82,7 +82,10 @@ the way to migrate:
     * `refactor`：重构（既没有新增功能，也没有修复错误的逻辑改动）
     * `perf`：性能相关的改动
     * `test`：测试相关的改动
-    * `chore`：杂项，构建过程或辅助功能相关的改动
+    * `chore`：杂项，可能是辅助功能相关的改动
+    * `build`：构建过程相关
+    * `ci` ： 持续集成相关
+    * `docker`：docker 镜像构建相关
     * `revert` 和 `Revert`：部分工具生成的 revert 信息首字母大写。
 * `bodyRequired`：如果为 true，则提交信息必须包含信息体。（不能只有信息头）
 * `lineLimit`：单行长度限制，对所有行生效，以字节为单位。
