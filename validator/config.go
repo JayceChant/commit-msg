@@ -26,41 +26,43 @@ type globalConfig struct {
 	Scopes        []string `json:"scopes,omitempty"`
 }
 
+type empty struct{}
+
 var (
 	// Config ...
 	Config *globalConfig = &globalConfig{Lang: "en", BodyRequired: false, LineLimit: 80}
 	// TypeSet ...
-	TypeSet = map[string]bool{
-		"feat":     true, // new feature 新功能
-		"fix":      true, // fix bug 修复
-		"docs":     true, // documentation 文档
-		"style":    true, // changes not affect logic 格式（不影响代码运行的变动）
-		"refactor": true, // 重构（既不是新增功能，也不是修改bug的代码变动）
-		"perf":     true, // performance 提升性能
-		"test":     true, // 增加测试
-		"chore":    true, // 构建过程或辅助工具的变动'
-		"revert":   true, // 撤销以前的 commit
-		"Revert":   true, // 有些工具生成的 revert 首字母大写
+	TypeSet = map[string]empty{
+		"feat":     {}, // new feature 新功能
+		"fix":      {}, // fix bug 修复
+		"docs":     {}, // documentation 文档
+		"style":    {}, // changes not affect logic 格式（不影响代码运行的变动）
+		"refactor": {}, // 重构（既不是新增功能，也不是修改bug的代码变动）
+		"perf":     {}, // performance 提升性能
+		"test":     {}, // 增加测试
+		"chore":    {}, // 构建过程或辅助工具的变动'
+		"revert":   {}, // 撤销以前的 commit
+		"Revert":   {}, // 有些工具生成的 revert 首字母大写
 	}
 	// TypesStr ...
 	TypesStr string
 )
 
 func locateConfigs() []string {
-	cfgs := make([]string, 0)
+	paths := make([]string, 0)
 	if home, err := homedir.Dir(); err == nil {
-		cfgs = append(cfgs, filepath.Join(home, configFileName))
+		paths = append(paths, filepath.Join(home, configFileName))
 	}
 
 	f, err := os.Stat(hookDir)
 	if (err == nil || os.IsExist(err)) && f.IsDir() {
 		// working dir is on project root
-		cfgs = append(cfgs, filepath.Join(hookDir, configFileName))
+		paths = append(paths, filepath.Join(hookDir, configFileName))
 	} else {
 		// work around for test
-		cfgs = append(cfgs, configFileName)
+		paths = append(paths, configFileName)
 	}
-	return cfgs
+	return paths
 }
 
 func loadConfig(path string, cfg *globalConfig) *globalConfig {
@@ -101,7 +103,7 @@ func init() {
 	// }
 
 	for _, t := range Config.Types {
-		TypeSet[t] = true
+		TypeSet[t] = empty{}
 	}
 
 	for _, t := range Config.DenyTypes {
