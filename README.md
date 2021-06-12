@@ -97,3 +97,10 @@ If there are no configuration files, the program will use the following default 
     "lineLimit": 80
 }
 ```
+
+## More info
+
+The project was first inspired by [validate-commit-msg](https://github.com/conventional-changelog-archived-repos/validate-commit-msg) . ( It has now been moved to  [conventional-changelog/commitlint](https://github.com/conventional-changelog/commitlint) )
+
+For more information about `conventionalcommits` , please see https://www.conventionalcommits.org/
+

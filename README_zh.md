@@ -97,3 +97,9 @@ the way to migrate:
     "lineLimit": 80
 }
 ```
+
+## 更多信息
+
+本项目最早受 [validate-commit-msg](https://github.com/conventional-changelog-archived-repos/validate-commit-msg) 启发。（该项目现已移至 [conventional-changelog/commitlint](https://github.com/conventional-changelog/commitlint)）
+
+更多关于 `conventionalcommits` 的信息，请参考 https://www.conventionalcommits.org/
