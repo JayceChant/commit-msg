@@ -1,6 +1,8 @@
 # commit-msg
 
-一个 go 实现的 git commit-msg 钩子。
+一个非常轻量的 git commit-msg 钩子，用 golang 实现。
+
+几乎零依赖。（唯一的依赖是只有一个文件的 `homedir`，无间接依赖。）
 
 [English](./README.md) | 中文
 

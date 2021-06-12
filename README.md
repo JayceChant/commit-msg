@@ -1,6 +1,8 @@
 # commit-msg
 
-A git commit-msg hook by go.
+A lightweight golang implementation of git commit-msg hook.
+
+Zero dependency, almost. ( `homedir` with only ONE file is the ONLY dependency, no indirect dependencies. )
 
 English | [中文](./README_zh.md)
 
