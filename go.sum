@@ -1,4 +1,2 @@
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
-github.com/shpota/goxygen v0.1.0 h1:R8iIPhESiyp1y079YX5pPxmsuDGQh462GvEymPp2lzg=
-github.com/shpota/goxygen v0.1.0/go.mod h1:GG9J+u6Z8MakNrowXKo4oVPkspCt6dzXeH1fljb1+mM=
