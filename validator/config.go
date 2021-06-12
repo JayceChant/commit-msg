@@ -37,10 +37,13 @@ var (
 		"fix":      {}, // fix bug 修复
 		"docs":     {}, // documentation 文档
 		"style":    {}, // changes not affect logic 格式（不影响代码运行的变动）
-		"refactor": {}, // 重构（既不是新增功能，也不是修改bug的代码变动）
+		"refactor": {}, // refactoring 重构（既不是新增功能，也不是修改bug的代码变动）
 		"perf":     {}, // performance 提升性能
 		"test":     {}, // 增加测试
-		"chore":    {}, // 构建过程或辅助工具的变动'
+		"chore":    {}, // 辅助工具的变动'
+		"build":    {}, // build process 构建过程
+		"ci":       {}, // continuous integration 持续集成相关
+		"docker":   {}, // 容器相关
 		"revert":   {}, // 撤销以前的 commit
 		"Revert":   {}, // 有些工具生成的 revert 首字母大写
 	}
