@@ -68,7 +68,7 @@ func TestGetMsg(t *testing.T) {
 	}, "Normal", 0)
 }
 
-func TestCheckEmpty(t *testing.T) {
+func TestValidateEmpty(t *testing.T) {
 	var emptyCases = []struct {
 		text string
 		want bool
@@ -88,21 +88,21 @@ func TestCheckEmpty(t *testing.T) {
 	}
 }
 
-func TestCheckType(t *testing.T) {
+func TestValidateType(t *testing.T) {
 	assertExitCode(t, func() {
-		checkType("feat")
+		validateType("feat")
 	}, "feat", 0)
 
 	assertExitCode(t, func() {
-		checkType("")
+		validateType("")
 	}, "no_type", int(state.WrongType))
 
 	assertExitCode(t, func() {
-		checkType("Feat")
+		validateType("Feat")
 	}, "wrong_type", int(state.WrongType))
 }
 
-func TestCheckHeader(t *testing.T) {
+func TestValidateHeader(t *testing.T) {
 	var headerCases = []struct {
 		text   string
 		name   string
@@ -122,12 +122,12 @@ func TestCheckHeader(t *testing.T) {
 	}
 	for _, tt := range headerCases {
 		assertExitCode(t, func() {
-			checkHeader(tt.text, tt.config)
+			validateHeader(tt.text, tt.config)
 		}, tt.name, tt.want)
 	}
 }
 
-func TestCheckBody(t *testing.T) {
+func TestValidateBody(t *testing.T) {
 	var bodyCases = []struct {
 		text   string
 		name   string
@@ -142,7 +142,7 @@ func TestCheckBody(t *testing.T) {
 	}
 	for _, tt := range bodyCases {
 		assertExitCode(t, func() {
-			checkBody(tt.text, tt.config)
+			validateBody(tt.text, tt.config)
 		}, tt.name, tt.want)
 	}
 }
@@ -165,7 +165,7 @@ This reverts commit 1234567890abcdef1234567890abcdef12345678.`, defaultCfg)
 	}, "Revert", 0)
 }
 
-func TestCheckScope(t *testing.T) {
+func TestValidateScope(t *testing.T) {
 	var scopeCases = []struct {
 		text   string
 		name   string
@@ -180,7 +180,7 @@ func TestCheckScope(t *testing.T) {
 	}
 	for _, tt := range scopeCases {
 		assertExitCode(t, func() {
-			checkScope(tt.text, tt.config)
+			validateScope(tt.text, tt.config)
 		}, tt.name, tt.want)
 	}
 }
