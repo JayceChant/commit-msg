@@ -44,8 +44,6 @@ var (
 		"build":    {}, // build process 构建过程
 		"ci":       {}, // continuous integration 持续集成相关
 		"docker":   {}, // 容器相关
-		"revert":   {}, // 撤销以前的 commit
-		"Revert":   {}, // 有些工具生成的 revert 首字母大写
 	}
 	// TypesStr ...
 	TypesStr string

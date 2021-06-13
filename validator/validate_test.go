@@ -80,7 +80,7 @@ func TestCheckEmpty(t *testing.T) {
 	}
 	for _, tt := range emptyCases {
 		t.Run("checkEmpty", func(t *testing.T) {
-			if got := checkEmpty(tt.text); got != tt.want {
+			if got := isEmpty(tt.text); got != tt.want {
 				t.Errorf(`checkEmpty("%s")=%v, want %v`, tt.text, got, tt.want)
 			}
 		})

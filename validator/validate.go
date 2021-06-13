@@ -41,7 +41,7 @@ func getMsg(path string) string {
 	}
 
 	f, err := os.Stat(path)
-	if err != nil {
+	if err != nil && !os.IsExist(err) {
 		log.Println(err)
 		state.FileMissing.LogAndExit(path)
 	}
@@ -60,8 +60,78 @@ func getMsg(path string) string {
 	return string(buf)
 }
 
-func checkEmpty(str string) bool {
+func validateMsg(msg string, config *globalConfig) {
+	if isEmpty(msg) {
+		state.EmptyMessage.LogAndExit()
+	}
+
+	isMergeCommit(msg)
+
+	sections := strings.SplitN(msg, "\n", 2)
+
+	if config.LineLimit <= 0 {
+		config.LineLimit = 80
+	}
+
+	checkHeader(sections[0], config)
+
+	if len(sections) == 2 {
+		checkBody(sections[1], config)
+	} else if config.BodyRequired {
+		state.BodyMissing.LogAndExit()
+	}
+
+	state.Validated.LogAndExit()
+}
+
+func isEmpty(str string) bool {
 	return strings.TrimSpace(str) == ""
+}
+
+func isMergeCommit(msg string) {
+	if strings.HasPrefix(msg, mergePrefix) {
+		state.Merge.LogAndExit()
+	}
+}
+
+func checkHeader(header string, config *globalConfig) {
+	if isEmpty(header) {
+		state.EmptyHeader.LogAndExit()
+	}
+
+	if isRevertHeader(header) {
+		// skip revert header checking
+		return
+		// but later body check is still required
+	}
+
+	re := regexp.MustCompile(headerPattern)
+	groups := re.FindStringSubmatch(header)
+
+	if groups == nil || isEmpty(groups[5]) {
+		state.BadHeaderFormat.LogAndExit(header)
+	}
+
+	typ := groups[3]
+	checkType(typ)
+
+	isFixupOrSquash := (groups[2] != "")
+
+	checkScope(groups[4], config)
+
+	// TODO: 根据规则对subject检查
+	// subject := groups[5]
+
+	length := len(header)
+	if length > config.LineLimit &&
+		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
+		state.LineOverLong.LogAndExit(length, config.LineLimit, header)
+	}
+}
+
+func isRevertHeader(header string) bool {
+	m, _ := regexp.MatchString(revertPattern, header)
+	return m
 }
 
 func checkType(typ string) {
@@ -74,7 +144,7 @@ func checkType(typ string) {
 }
 
 func checkScope(scope string, config *globalConfig) {
-	if checkEmpty(scope) {
+	if isEmpty(scope) {
 		if config.ScopeRequired {
 			state.ScopeMissing.LogAndExit()
 		}
@@ -93,40 +163,8 @@ func checkScope(scope string, config *globalConfig) {
 	state.WrongScope.LogAndExit(scope, strings.Join(config.Scopes, ", "))
 }
 
-func checkHeader(header string, config *globalConfig) {
-	if checkEmpty(header) {
-		state.EmptyHeader.LogAndExit()
-	}
-
-	re := regexp.MustCompile(headerPattern)
-	groups := re.FindStringSubmatch(header)
-
-	if groups == nil || checkEmpty(groups[5]) {
-		state.BadHeaderFormat.LogAndExit(header)
-	}
-
-	typ := groups[3]
-	checkType(typ)
-
-	isFixupOrSquash := (groups[2] != "")
-
-	checkScope(groups[4], config)
-
-	// TODO: 根据规则对subject检查
-	// subject := groups[5]
-
-	if config.LineLimit <= 0 {
-		config.LineLimit = 80
-	}
-	length := len(header)
-	if length > config.LineLimit &&
-		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
-		state.LineOverLong.LogAndExit(length, config.LineLimit, header)
-	}
-}
-
 func checkBody(body string, config *globalConfig) {
-	if checkEmpty(body) {
+	if isEmpty(body) {
 		if config.BodyRequired {
 			state.BodyMissing.LogAndExit()
 		} else {
@@ -134,41 +172,14 @@ func checkBody(body string, config *globalConfig) {
 		}
 	}
 
-	if !checkEmpty(strings.SplitN(body, "\n", 2)[0]) {
+	if !isEmpty(strings.SplitN(body, "\n", 2)[0]) {
 		state.NoBlankLineBeforeBody.LogAndExit()
 	}
 
-	if config.LineLimit <= 0 {
-		config.LineLimit = 80
-	}
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
 		if length > config.LineLimit {
 			state.LineOverLong.LogAndExit(length, config.LineLimit, line)
 		}
 	}
-}
-
-func validateMsg(msg string, config *globalConfig) {
-	if checkEmpty(msg) {
-		state.EmptyMessage.LogAndExit()
-	}
-
-	if strings.HasPrefix(msg, mergePrefix) {
-		state.Merge.LogAndExit()
-	}
-
-	sections := strings.SplitN(msg, "\n", 2)
-
-	if m, _ := regexp.MatchString(revertPattern, sections[0]); !m {
-		checkHeader(sections[0], config)
-	}
-
-	if len(sections) == 2 {
-		checkBody(sections[1], config)
-	} else if config.BodyRequired {
-		state.BodyMissing.LogAndExit()
-	}
-
-	state.Validated.LogAndExit()
 }
