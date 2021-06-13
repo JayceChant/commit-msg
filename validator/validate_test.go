@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	zeroCfg         = &globalConfig{}
 	defaultCfg      = &globalConfig{Lang: "en", BodyRequired: true, LineLimit: 80}
 	scopeRequired   = &globalConfig{ScopeRequired: true}
 	scopesSpecified = &globalConfig{Scopes: []string{"model", "view", "controller"}}
@@ -116,6 +117,8 @@ func TestCheckHeader(t *testing.T) {
 		{"test: ", "bad_header_no_title", defaultCfg, int(state.BadHeaderFormat)},
 		{"feat: something changes", "scope_missing", scopeRequired, int(state.ScopeMissing)},
 		{"feat( ): something changes", "empty_scope", scopeRequired, int(state.BadHeaderFormat)},
+		{"feat: header that too lonnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng", "header_too_long", defaultCfg, int(state.LineOverLong)},
+		{"feat: header that too lonnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng", "header_length_no_limit", zeroCfg, 0},
 	}
 	for _, tt := range headerCases {
 		assertExitCode(t, func() {
@@ -126,18 +129,20 @@ func TestCheckHeader(t *testing.T) {
 
 func TestCheckBody(t *testing.T) {
 	var bodyCases = []struct {
-		text string
-		name string
-		want int
+		text   string
+		name   string
+		config *globalConfig
+		want   int
 	}{
-		{"", "body_missing", int(state.BodyMissing)},
-		{"body", "no_empty_line", int(state.NoBlankLineBeforeBody)},
-		{"\r\na body with too looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line", "line_over_long", int(state.LineOverLong)},
-		{"\r\nnormal body", "normal", 0},
+		{"", "body_missing", defaultCfg, int(state.BodyMissing)},
+		{"body", "no_blank_line", defaultCfg, int(state.NoBlankLineBeforeBody)},
+		{"\r\na body with too looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line", "body_line_over_long", defaultCfg, int(state.LineOverLong)},
+		{"\r\na body with too looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line", "body_line_no_limit", zeroCfg, 0},
+		{"\r\nnormal body", "normal", defaultCfg, 0},
 	}
 	for _, tt := range bodyCases {
 		assertExitCode(t, func() {
-			checkBody(tt.text, defaultCfg)
+			checkBody(tt.text, tt.config)
 		}, tt.name, tt.want)
 	}
 }

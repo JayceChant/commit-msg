@@ -69,10 +69,6 @@ func validateMsg(msg string, config *globalConfig) {
 
 	sections := strings.SplitN(msg, "\n", 2)
 
-	if config.LineLimit <= 0 {
-		config.LineLimit = 80
-	}
-
 	checkHeader(sections[0], config)
 
 	if len(sections) == 2 {
@@ -123,7 +119,8 @@ func checkHeader(header string, config *globalConfig) {
 	// subject := groups[5]
 
 	length := len(header)
-	if length > config.LineLimit &&
+	if config.LineLimit > 0 &&
+		length > config.LineLimit &&
 		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
 		state.LineOverLong.LogAndExit(length, config.LineLimit, header)
 	}
@@ -178,7 +175,8 @@ func checkBody(body string, config *globalConfig) {
 
 	for _, line := range strings.Split(body, "\n") {
 		length := len(line)
-		if length > config.LineLimit {
+		if config.LineLimit > 0 &&
+			length > config.LineLimit {
 			state.LineOverLong.LogAndExit(length, config.LineLimit, line)
 		}
 	}
