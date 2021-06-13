@@ -124,7 +124,7 @@ func validateHeader(header string, config *globalConfig) {
 	length := len(header)
 	if config.LineLimit > 0 &&
 		length > config.LineLimit &&
-		!(isFixupOrSquash || typ == "revert" || typ == "Revert") {
+		!isFixupOrSquash {
 		state.LineOverLong.LogAndExit(length, config.LineLimit, header)
 	}
 }
