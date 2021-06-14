@@ -27,13 +27,14 @@ type validateConfig struct {
 	Scopes        []string `json:"scopes,omitempty"`
 }
 
-type empty struct{}
+// use type alias to avoid new type and unexpected method definition
+type dummy = struct{}
 
 var (
 	// globalConfig ...
 	globalConfig *validateConfig = &validateConfig{Lang: "en", BodyRequired: false, LineLimit: 80}
 	// TypeSet ...
-	TypeSet = map[string]empty{
+	TypeSet = map[string]dummy{
 		"feat":     {}, // new feature 新功能
 		"fix":      {}, // fix bug 修复
 		"docs":     {}, // documentation 文档
@@ -81,41 +82,26 @@ func loadConfig(path string, cfg *validateConfig) *validateConfig {
 	return cfg
 }
 
-// func initConfig(path string) *globalConfig {
-// 	cfg := &globalConfig{"en", false, 80}
-// 	f, err := os.Create(path)
-// 	if err != nil {
-// 		return cfg
-// 	}
-// 	defer f.Close()
-// 	enc := json.NewEncoder(f)
-// 	enc.SetIndent("", "    ")
-// 	enc.Encode(cfg)
-// 	return cfg
-// }
-
 func init() {
 	paths := locateConfigs()
 	for _, p := range paths {
 		// TODO: fix json value overlaping
 		globalConfig = loadConfig(p, globalConfig)
 	}
-	// if Config == nil {
-	// 	Config = initConfig(path)
-	// }
 
 	for _, t := range globalConfig.Types {
-		TypeSet[t] = empty{}
+		TypeSet[t] = dummy{}
 	}
 
 	for _, t := range globalConfig.DenyTypes {
 		delete(TypeSet, t)
 	}
 
-	types := make([]string, 0, len(TypeSet))
+	types := make([]string, 0, len(TypeSet)+2)
 	for t := range TypeSet {
 		types = append(types, t)
 	}
+	types = append(types, "revert", "Revert")
 	TypesStr = strings.Join(types, ", ")
 
 	state.Init(lang.LoadLanguage(globalConfig.Lang), TypesStr)
