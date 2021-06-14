@@ -1,6 +1,10 @@
-package state
+package lang
 
-import "fmt"
+import (
+	"fmt"
+
+	. "github.com/JayceChant/commit-msg/state"
+)
 
 func LoadLanguage(language string) LangPack {
 	if l, ok := langs[language]; ok {

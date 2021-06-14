@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/JayceChant/commit-msg/lang"
 	"github.com/JayceChant/commit-msg/state"
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -117,5 +118,5 @@ func init() {
 	}
 	TypesStr = strings.Join(types, ", ")
 
-	state.Init(state.LoadLanguage(Config.Lang), TypesStr)
+	state.Init(lang.LoadLanguage(Config.Lang), TypesStr)
 }
