@@ -46,11 +46,6 @@ const (
 	UndefindedError
 )
 
-// Error ...
-// func (state State) Error() string {
-// 	return lang.Hints[state]
-// }
-
 // LogAndExit ...
 func (state State) LogAndExit(v ...interface{}) {
 	log.Println(lang.GetHint(state, v...))

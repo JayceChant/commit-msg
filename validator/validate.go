@@ -32,7 +32,7 @@ func Validate(file string) {
 		}
 	}()
 
-	validateMsg(getMsg(file), Config)
+	validateMsg(getMsg(file), globalConfig)
 }
 
 func getMsg(path string) string {
@@ -60,7 +60,7 @@ func getMsg(path string) string {
 	return string(buf)
 }
 
-func validateMsg(msg string, config *globalConfig) {
+func validateMsg(msg string, config *validateConfig) {
 	if isEmpty(msg) {
 		state.EmptyMessage.LogAndExit()
 	}
@@ -93,7 +93,7 @@ func isMergeCommit(msg string) {
 	}
 }
 
-func validateHeader(header string, config *globalConfig) {
+func validateHeader(header string, config *validateConfig) {
 	if isEmpty(header) {
 		state.EmptyHeader.LogAndExit()
 	}
@@ -143,7 +143,7 @@ func validateType(typ string) {
 	state.WrongType.LogAndExit(typ, TypesStr)
 }
 
-func validateScope(scope string, config *globalConfig) {
+func validateScope(scope string, config *validateConfig) {
 	if isEmpty(scope) {
 		if config.ScopeRequired {
 			state.ScopeMissing.LogAndExit()
@@ -163,7 +163,7 @@ func validateScope(scope string, config *globalConfig) {
 	state.WrongScope.LogAndExit(scope, strings.Join(config.Scopes, ", "))
 }
 
-func validateBody(body string, config *globalConfig) {
+func validateBody(body string, config *validateConfig) {
 	if isEmpty(body) {
 		if config.BodyRequired {
 			state.BodyMissing.LogAndExit()

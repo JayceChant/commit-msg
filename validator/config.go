@@ -17,7 +17,7 @@ const (
 	hookDir        = "./.git/hooks/"
 )
 
-type globalConfig struct {
+type validateConfig struct {
 	Lang          string   `json:"lang,omitempty"`
 	BodyRequired  bool     `json:"bodyRequired,omitempty"`
 	LineLimit     int      `json:"lineLimit,omitempty"`
@@ -30,8 +30,8 @@ type globalConfig struct {
 type empty struct{}
 
 var (
-	// Config ...
-	Config *globalConfig = &globalConfig{Lang: "en", BodyRequired: false, LineLimit: 80}
+	// globalConfig ...
+	globalConfig *validateConfig = &validateConfig{Lang: "en", BodyRequired: false, LineLimit: 80}
 	// TypeSet ...
 	TypeSet = map[string]empty{
 		"feat":     {}, // new feature 新功能
@@ -67,7 +67,7 @@ func locateConfigs() []string {
 	return paths
 }
 
-func loadConfig(path string, cfg *globalConfig) *globalConfig {
+func loadConfig(path string, cfg *validateConfig) *validateConfig {
 	f, err := os.Open(path)
 	if err != nil && !os.IsExist(err) {
 		return cfg
@@ -98,17 +98,17 @@ func init() {
 	paths := locateConfigs()
 	for _, p := range paths {
 		// TODO: fix json value overlaping
-		Config = loadConfig(p, Config)
+		globalConfig = loadConfig(p, globalConfig)
 	}
 	// if Config == nil {
 	// 	Config = initConfig(path)
 	// }
 
-	for _, t := range Config.Types {
+	for _, t := range globalConfig.Types {
 		TypeSet[t] = empty{}
 	}
 
-	for _, t := range Config.DenyTypes {
+	for _, t := range globalConfig.DenyTypes {
 		delete(TypeSet, t)
 	}
 
@@ -118,5 +118,5 @@ func init() {
 	}
 	TypesStr = strings.Join(types, ", ")
 
-	state.Init(lang.LoadLanguage(Config.Lang), TypesStr)
+	state.Init(lang.LoadLanguage(globalConfig.Lang), TypesStr)
 }

@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	zeroCfg         = &globalConfig{}
-	defaultCfg      = &globalConfig{Lang: "en", BodyRequired: true, LineLimit: 80}
-	scopeRequired   = &globalConfig{ScopeRequired: true}
-	scopesSpecified = &globalConfig{Scopes: []string{"model", "view", "controller"}}
+	zeroCfg         = &validateConfig{}
+	defaultCfg      = &validateConfig{Lang: "en", BodyRequired: true, LineLimit: 80}
+	scopeRequired   = &validateConfig{ScopeRequired: true}
+	scopesSpecified = &validateConfig{Scopes: []string{"model", "view", "controller"}}
 )
 
 func assertExitCode(t *testing.T, f func(), name string, expected int) {
@@ -106,7 +106,7 @@ func TestValidateHeader(t *testing.T) {
 	var headerCases = []struct {
 		text   string
 		name   string
-		config *globalConfig
+		config *validateConfig
 		want   int
 	}{
 		{"", "empty_header", defaultCfg, int(state.EmptyHeader)},
@@ -131,7 +131,7 @@ func TestValidateBody(t *testing.T) {
 	var bodyCases = []struct {
 		text   string
 		name   string
-		config *globalConfig
+		config *validateConfig
 		want   int
 	}{
 		{"", "body_missing", defaultCfg, int(state.BodyMissing)},
@@ -169,7 +169,7 @@ func TestValidateScope(t *testing.T) {
 	var scopeCases = []struct {
 		text   string
 		name   string
-		config *globalConfig
+		config *validateConfig
 		want   int
 	}{
 		{"model", "normal", scopeRequired, 0},
