@@ -6,23 +6,23 @@ import (
 )
 
 var (
-	lang  *LangPack
+	lang  LangPack
 	types string
-	// type check
-	_ error = State(0)
 )
 
 // Init ...
-func Init(l string, t string) {
-	var ok bool
-	if lang, ok = langs[l]; !ok {
-		lang = langEn
-	}
-	types = t
+func Init(language LangPack, typeStr string) {
+	lang = language
+	types = typeStr
+}
+
+type LangPack interface {
+	GetHint(state State, v ...interface{}) string
+	GetRule(types string) string
 }
 
 // State indicate the state of a commit message
-type State int
+type State int8
 
 // message states
 const (
@@ -47,20 +47,20 @@ const (
 )
 
 // Error ...
-func (state State) Error() string {
-	return lang.Hints[state]
-}
+// func (state State) Error() string {
+// 	return lang.Hints[state]
+// }
 
 // LogAndExit ...
 func (state State) LogAndExit(v ...interface{}) {
-	log.Printf(state.Error(), v...)
+	log.Println(lang.GetHint(state, v...))
 
 	if state.IsNormal() {
 		os.Exit(0)
 	}
 
 	if state.IsFormatError() {
-		log.Printf(lang.Rule, types)
+		log.Println(lang.GetRule(types))
 	}
 
 	os.Exit(int(state))

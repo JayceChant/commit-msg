@@ -117,5 +117,5 @@ func init() {
 	}
 	TypesStr = strings.Join(types, ", ")
 
-	state.Init(Config.Lang, TypesStr)
+	state.Init(state.LoadLanguage(Config.Lang), TypesStr)
 }
