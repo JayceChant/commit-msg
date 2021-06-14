@@ -9,12 +9,12 @@ import (
 	"github.com/JayceChant/commit-msg/validator"
 )
 
-const (
-	versionStr = "v0.2.0"
-)
-
 var (
 	versionFlag = flag.Bool("version", false, "")
+	version     string
+	goVersion   string
+	commitHash  string
+	buildTime   string
 )
 
 func main() {
@@ -33,5 +33,14 @@ func main() {
 }
 
 func printVersion(cmd string) {
-	fmt.Printf("%s %s\n", filepath.Base(cmd), versionStr)
+	fmt.Println(filepath.Base(cmd), version)
+	if goVersion != "" {
+		fmt.Println(goVersion)
+	}
+	if commitHash != "" {
+		fmt.Println("commit hash :", commitHash)
+	}
+	if buildTime != "" {
+		fmt.Println("build at :", buildTime)
+	}
 }
