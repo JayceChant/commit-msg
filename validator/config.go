@@ -4,17 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 
+	"github.com/JayceChant/commit-msg/dir"
 	"github.com/JayceChant/commit-msg/lang"
 	"github.com/JayceChant/commit-msg/state"
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 const (
 	configFileName = ".commit-msg.json"
-	hookDir        = "./.git/hooks/"
 )
 
 type validateConfig struct {
@@ -51,23 +49,6 @@ var (
 	TypesStr string
 )
 
-func locateConfigs() []string {
-	paths := make([]string, 0)
-	if home, err := homedir.Dir(); err == nil {
-		paths = append(paths, filepath.Join(home, configFileName))
-	}
-
-	f, err := os.Stat(hookDir)
-	if (err == nil || os.IsExist(err)) && f.IsDir() {
-		// working dir is on project root
-		paths = append(paths, filepath.Join(hookDir, configFileName))
-	} else {
-		// work around for test
-		paths = append(paths, configFileName)
-	}
-	return paths
-}
-
 func loadConfig(path string, cfg *validateConfig) *validateConfig {
 	f, err := os.Open(path)
 	if err != nil && !os.IsExist(err) {
@@ -83,7 +64,7 @@ func loadConfig(path string, cfg *validateConfig) *validateConfig {
 }
 
 func init() {
-	paths := locateConfigs()
+	paths := dir.FindFiles(configFileName)
 	for _, p := range paths {
 		// TODO: fix json value overlaping
 		globalConfig = loadConfig(p, globalConfig)

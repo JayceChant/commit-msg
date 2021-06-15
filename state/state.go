@@ -1,6 +1,9 @@
+//go:generate stringer -type=State
 package state
 
 import (
+	"encoding"
+	"fmt"
 	"log"
 	"os"
 )
@@ -19,6 +22,12 @@ func Init(language LangPack, typeStr string) {
 type LangPack interface {
 	GetHint(state State, v ...interface{}) string
 	GetRule(types string) string
+}
+
+func _() {
+	// type check
+	var _ encoding.TextMarshaler = State(0)
+	var _ encoding.TextUnmarshaler = (*State)(nil)
 }
 
 // State indicate the state of a commit message
@@ -69,4 +78,19 @@ func (state State) IsNormal() bool {
 // IsFormatError return if the state a format error
 func (state State) IsFormatError() bool {
 	return state >= EmptyMessage
+}
+
+func (state State) MarshalText() (text []byte, err error) {
+	return []byte(state.String()), nil
+}
+
+func (state *State) UnmarshalText(text []byte) error {
+	str := string(text)
+	for s := Validated; s <= UndefindedError; s++ {
+		if s.String() == str {
+			*state = s
+			return nil
+		}
+	}
+	return fmt.Errorf("unknown state : %v", str)
 }

@@ -101,6 +101,30 @@ the way to migrate:
 }
 ```
 
+## 本地化
+
+程序内置了两种语言的提示：英语（en） 和 中文（zh）。
+
+你可以通过以下两种方式增加支持的语言：
+
+### 提交代码
+
+内置的语言支持放在 `lang` 目录下，每种语言一个 `.go` 源文件。你可以拷贝 `lang/english.go` ，修改文件名并翻译内容，然后提交，发起 Pull Request。待 PR 通过后，下一个版本就可以支持对应的语言。
+
+当然，考虑到我的英语水平有限（中文的措辞也不见得很好），你也可以帮忙改进已有的语言支持。
+
+### 增加语言翻译文件
+
+但提交代码未必是最好的办法。
+
+一方面，提交代码耗时较多。如果你不能自行编译，而是要等代码合入之后发布下一个版本，还需要等待更多的时间。另一方面，这毕竟只是一个小工具，为了避免程序变得臃肿，视乎使用者的多寡，一些语言我可能不会选择合入。
+
+你可以选择更快捷的方式：增加语言文件。
+
+具体的做法是，拷贝项目根目录下的 [commit-msg.en.json.sample](./commit-msg.en.json.sample) 文件，去掉文件名里的 `.sample` ，把 `en` 改为对应的语言（举例说这种语言的缩写为 `xx`）。把文件内容翻译好，注意保留里面的格式化动词 `%s` 和换行符 `\n` 。然后把文件放到跟配置文件相同的目录（`home` 目录或者 `hooks` 目录）。之后记得修改语言配置为对应的语言（这里是 `xx`）。
+
+跟配置文件不同，如果相同语言的翻译在 `home` 目录和 `hooks` 目录同时存在，并不会合并两者的内容，而是直接以项目 `hooks` 目录的翻译为准。所以每一个语言文件里的内容，都必须是完整的翻译。
+
 ## 更多信息
 
 本项目最早受 [validate-commit-msg](https://github.com/conventional-changelog-archived-repos/validate-commit-msg) 启发。（该项目现已移至 [conventional-changelog/commitlint](https://github.com/conventional-changelog/commitlint)）

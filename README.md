@@ -101,6 +101,30 @@ If there are no configuration files, the program will use the following default 
 }
 ```
 
+## Localization
+
+The program has built-in two languages: English (en) and Chinese (zh).
+
+You can add language support in two ways:
+
+### Contributing code
+
+The built-in languages are placed in the `lang` directory, with individual `.go` source file for each. You can copy `lang/english.go`, change the file name and translate the content, then commit it to launch a Pull Request. The language will be added in next release after the PR is approved.
+
+Of course, considering my limited English (my Chinese wording is not necessarily good either), you can also help improve the existing language support.
+
+### Add translation file
+
+However, committing code may not be the best way to go.
+
+Firstly , committing code is time-consuming. If you can't compile it yourself, but have to wait for next version release after the code merged in, it would be a long time until the version is ready. On the other hand, this is only a small tool after all, and to avoid the program becoming bloated, some languages may not be merged in, depending on the number of users.
+
+You can choose a quicker way: adding translation file.
+
+To do this, copy the [commit-msg.en.json.sample](./commit-msg.en.json.sample) file in the project root directory, remove `.sample` from the file name, and change `en` to the corresponding language (e.g., the abbreviation for language to be supported is `xx`) . Translate the contents of the file, keeping the formatting verb `%s` and the line break `\n`. Then put the file in the same directory as the configuration file (`home` directory or `hooks` directory). Afterwards, remember to change the language configuration to the corresponding language (`xx` in this case).
+
+Unlike the configuration file, if the translations for the same language exist in both `home` directory and `hooks` directory, the contents of both will not be merged, but the translation in `hooks` directory of the project will prevail. The contents of each language file must be a complete translation.
+
 ## More info
 
 The project was first inspired by [validate-commit-msg](https://github.com/conventional-changelog-archived-repos/validate-commit-msg) . ( It has now been moved to  [conventional-changelog/commitlint](https://github.com/conventional-changelog/commitlint) )
