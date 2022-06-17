@@ -38,7 +38,7 @@ go install golang.org/x/tools/cmd/stringer
 
 #### Install
 ```sh
-sudo make
+make
 ```
 
 
