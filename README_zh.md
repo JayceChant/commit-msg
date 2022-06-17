@@ -28,10 +28,18 @@
 
 ### 从源码编译并安装
 
-对于 win64 以外的平台，请自行配置 go 开发环境并编译安装。
+#### 安装要求
+- [x] `Golang`
+- [x] `stringer`
+```sh
+go install golang.org/x/tools/cmd/stringer
+```
+- [x] `upx`
 
-因为时间关系，抱歉没有更详细的指引。
-
+#### 安装方法
+```sh
+sudo make
+```
 
 
 ## 配置
