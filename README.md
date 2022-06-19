@@ -28,10 +28,18 @@ You can download the latest pre-built binary from [here](https://github.com/Jayc
 
 ### Build and install from source code
 
-For platforms other than win64, please setup the go environment and build it yourself.
+#### Requirements
+- [x] `Golang`
+- [x] `stringer`
+```sh
+go install golang.org/x/tools/cmd/stringer
+```
+- [x] `upx`
 
-Sorry for the poor instructions.
-
+#### Install
+```sh
+make
+```
 
 
 ## Configuration
